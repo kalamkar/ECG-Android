@@ -3,18 +3,14 @@ package care.dovetail.monitor;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import android.util.Log;
-import care.dovetail.monitor.BackgroundService.ValuesListener;
 
 public class BeatCounter {
 	private static final String TAG = "BeatCounter";
 
-
-	private final ValuesListener listener;
 	private final int threshold1;
 	private final int threshold2;
 
-	public BeatCounter(ValuesListener listener, int threshold1, int threshold2) {
-		this.listener = listener;
+	public BeatCounter(int threshold1, int threshold2) {
 		this.threshold1 = threshold1;
 		this.threshold2 = threshold2;
 	}
@@ -60,7 +56,7 @@ public class BeatCounter {
 			}
 		}
 
-		listener.onNewValues(buffer, hasHeartBeat);
+		// listener.onNewValues(buffer, hasHeartBeat);
 
 		if (hasHeartBeat) {
 			heartBeatDetected(currentTime);

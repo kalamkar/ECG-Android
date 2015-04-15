@@ -1,5 +1,6 @@
 package care.dovetail.monitor;
 
+
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -12,6 +13,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import care.dovetail.common.model.Event;
+import care.dovetail.monitor.BluetoothSmartClient.ConnectionListener;
 
 @SuppressLint("NewApi")
 public class BackgroundService extends Service {
@@ -26,11 +28,19 @@ public class BackgroundService extends Service {
     private final IBinder binder = new LocalBinder();
     private NotificationManager notifications;
 
-    public interface ValuesListener {
-    	public void onNewValues(float values[], boolean hasHeartBeat);
-    }
+	private ConnectionListener listener = new ConnectionListener() {
+		@Override
+		public void onConnect(String address) {
+			showNotification(R.string.listening_beats, R.string.baby_monitor_is_working,
+					Event.Type.SENSOR_CONNECTED.name(), R.drawable.ic_service);
+		}
 
-	private ValuesListener listener = new ValuesListener() {
+		@Override
+		public void onDisconnect(String address) {
+			showNotification(R.string.app_name, R.string.baby_monitor_is_not_working,
+					Event.Type.SENSOR_DISCONNECTED.name(), R.drawable.ic_service_error);
+		}
+
 		@Override
 		public void onNewValues(float values[], boolean hasHeartBeat) {
 			sendBroadcast(new Intent(Config.SERVICE_DATA)

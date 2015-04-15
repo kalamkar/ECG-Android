@@ -15,17 +15,22 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
-import care.dovetail.monitor.BackgroundService.ValuesListener;
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class BluetoothSmartClient extends BluetoothGattCallback {
 	private static final String TAG = "BluetoothSmartClient";
 
 	private final Context context;
-	private final ValuesListener listener;
+	private final ConnectionListener listener;
 	private BluetoothGattCharacteristic sensorData;
 
-	public BluetoothSmartClient(Context context, ValuesListener listener) {
+    public interface ConnectionListener {
+    	public void onConnect(String address);
+    	public void onDisconnect(String address);
+    	public void onNewValues(float values[], boolean hasHeartBeat);
+    }
+
+	public BluetoothSmartClient(Context context, ConnectionListener listener) {
 		this.context = context;
 		this.listener = listener;
 	}
@@ -51,10 +56,11 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
         	Log.i(TAG, String.format("Connected to GATT server %s. "
         			+ "Attempting to start service discovery %b"
             		, gatt.getDevice().getAddress(), gatt.discoverServices()));
+        	listener.onConnect(gatt.getDevice().getAddress());
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
         	Log.e(TAG, String.format("Disconnected from GATT server %s.",
         			gatt.getDevice().getAddress()));
-        	listener.onNewValues(new float[] {}, false);
+        	listener.onDisconnect(gatt.getDevice().getAddress());
         }
     }
 
