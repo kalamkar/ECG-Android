@@ -42,37 +42,10 @@
                 android:textAppearance="?android:attr/textAppearanceSmall" />
         </LinearLayout>
 
-        <CheckBox
-            android:id="@+id/compress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:text="@string/compress" />
-
-        <SeekBar
-            android:id="@+id/gain"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_below="@+id/compress"
-            android:max="10000"
-            android:progress="5000" />
-
-        <TextView
-            android:id="@+id/gainText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/gain"
-            android:layout_centerHorizontal="true"
-            android:text="@integer/default_gain"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/gainText"
+            android:layout_below="@+id/beat"
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:orientation="horizontal" >
 
@@ -153,15 +126,6 @@
             android:layout_alignParentBottom="true"
             android:enabled="false"
             android:text="@string/bluetooth" />
-
-        <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/gain"
-            android:layout_below="@+id/gain"
-            android:text="@string/gain"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
 
     </RelativeLayout>
 

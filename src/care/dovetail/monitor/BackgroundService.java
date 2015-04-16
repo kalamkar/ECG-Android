@@ -9,7 +9,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import care.dovetail.common.model.Event;
@@ -57,25 +56,12 @@ public class BackgroundService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		app = (App) getApplication();
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-			initBluetooth();
-		}
+		prefs = getSharedPreferences(getPackageName(), MODE_PRIVATE);
 
 		showNotification(R.string.app_name, R.string.baby_monitor_is_not_working,
 				Event.Type.SERVICE_STARTED.name(), R.drawable.ic_service_error);
-	}
 
-	private void initBluetooth() {
-		bluetooth = new BluetoothSmartClient(app, listener);
-		prefs = getSharedPreferences(getPackageName(), MODE_PRIVATE);
-		prefs.registerOnSharedPreferenceChangeListener(
-				new SharedPreferences.OnSharedPreferenceChangeListener() {
-					@Override
-					public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-						bluetooth.connectToDevice(app.settings.getBluetoothAddress());
-					}});
-		bluetooth.connectToDevice(app.settings.getBluetoothAddress());
+		initBluetooth();
 	}
 
 	@Override
@@ -94,14 +80,7 @@ public class BackgroundService extends Service {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		startRecording();
 		return binder;
-	}
-
-	@Override
-	public boolean onUnbind(Intent intent) {
-		stopRecording();
-		return super.onUnbind(intent);
 	}
 
 	public class LocalBinder extends Binder {
@@ -110,15 +89,37 @@ public class BackgroundService extends Service {
         }
     }
 
-	public void startRecording() {
+	private void initBluetooth() {
 		if (bluetooth != null) {
-			bluetooth.enableNotifications();
+			if (!bluetooth.isConnected()) {
+				bluetooth.connectToDevice(app.settings.getBluetoothAddress());
+			}
+			return;
+		}
+		bluetooth = new BluetoothSmartClient(app, listener);
+		prefs.registerOnSharedPreferenceChangeListener(
+				new SharedPreferences.OnSharedPreferenceChangeListener() {
+					@Override
+					public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+						bluetooth.disconnect();
+						bluetooth.connectToDevice(app.settings.getBluetoothAddress());
+					}});
+		bluetooth.connectToDevice(app.settings.getBluetoothAddress());
+	}
+
+	public void startRecording() {
+		if (bluetooth != null && bluetooth.isConnected() && bluetooth.enableNotifications()) {
+			Log.i(TAG, "Enabled notifications from Bluetooth device");
+		} else {
+			Log.e(TAG, "Failed to enable notifications from Bluetooth device");
 		}
 	}
 
 	public void stopRecording() {
-		if (bluetooth != null) {
-			bluetooth.disableNotifications();
+		if (bluetooth != null && bluetooth.isConnected() && bluetooth.disableNotifications()) {
+			Log.i(TAG, "Disabled notifications from Bluetooth device");
+		} else {
+			Log.e(TAG, "Failed to disable notifications from Bluetooth device");
 		}
 	}
 

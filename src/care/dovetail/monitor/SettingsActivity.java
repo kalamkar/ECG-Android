@@ -12,8 +12,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -26,8 +24,7 @@ import com.jjoe64.graphview.GridLabelRenderer.GridStyle;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-public class SettingsActivity extends Activity implements OnSeekBarChangeListener,
-		OnCheckedChangeListener {
+public class SettingsActivity extends Activity implements OnSeekBarChangeListener {
 	private static final String TAG = "SettingsActivity";
 
 	private App app;
@@ -37,10 +34,8 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 	private boolean isUpdating = false;
 	private long lastChangeTime = 0;
 
-	private SeekBar gain;
 	private SeekBar threshold1;
 	private SeekBar threshold2;
-	private CheckBox compress;
 	private GraphView graph;
 
 	LineGraphSeries<DataPoint> audioDataSeries;
@@ -54,8 +49,6 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 
         startService(new Intent(this, BackgroundService.class));
 
-		compress = (CheckBox) findViewById(R.id.compress);
-		gain = (SeekBar) findViewById(R.id.gain);
 		threshold1 = (SeekBar) findViewById(R.id.filter1);
 		threshold2 = (SeekBar) findViewById(R.id.filter2);
 
@@ -87,8 +80,8 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 	@Override
     protected void onResume() {
         super.onResume();
-        Intent intent = new Intent(this, BackgroundService.class);
-        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        bindService(new Intent(this, BackgroundService.class), serviceConnection,
+        		Context.BIND_AUTO_CREATE);
         isUpdating = true;
         new Thread(new UiUpdater()).start();
         registerReceiver(receiver, new IntentFilter(Config.SERVICE_EVENT));
@@ -101,6 +94,9 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
         if (serviceBound) {
             unbindService(serviceConnection);
             serviceBound = false;
+            if (service != null) {
+        		service.stopRecording();
+        	}
         }
         unregisterReceiver(receiver);
         super.onStop();
@@ -140,6 +136,7 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
             	return;
             }
             serviceBound = true;
+            service.startRecording();
         	updateUi();
         	setUiChangeListeners();
         }
@@ -151,14 +148,7 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
         }
     };
 
-    private void restartRecording() {
-    	if (serviceBound && service != null) {
-		}
-    }
-
     private void setUiChangeListeners() {
-		gain.setOnSeekBarChangeListener(this);
-		compress.setOnCheckedChangeListener(this);
 		threshold1.setOnSeekBarChangeListener(this);
 		threshold2.setOnSeekBarChangeListener(this);
     }
@@ -168,13 +158,9 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
     		return;
     	}
 
-    	gain.setProgress(app.settings.getAudioGain());
     	threshold1.setProgress(app.settings.getAudioThreshold1());
     	threshold2.setProgress(app.settings.getAudioThreshold2());
-    	compress.setChecked(app.settings.getCompress());
 
-    	((TextView) findViewById(R.id.gainText)).setText(
-    			Integer.toString(app.settings.getAudioGain()));
     	((TextView) findViewById(R.id.filter1Text)).setText(
     			Integer.toString(app.settings.getAudioThreshold1()));
     	((TextView) findViewById(R.id.filter2Text)).setText(
@@ -182,28 +168,16 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
     }
 
 	@Override
-	public void onCheckedChanged(CompoundButton checkBox, boolean isChecked) {
-		if (checkBox.getId() == compress.getId()) {
-			app.settings.setCompress(compress.isChecked());
-		}
-		restartRecording();
-	}
-
-	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 		long currentTime = System.currentTimeMillis();
 		if (fromUser && currentTime - lastChangeTime > Config.UI_UPDATE_INTERVAL_MILLIS) {
-			if (seekBar.getId() == R.id.gain) {
-				app.settings.setAudioGain(progress);
-				((TextView) findViewById(R.id.gainText)).setText(Integer.toString(progress));
-			} else if (seekBar.getId() == R.id.filter1) {
+			if (seekBar.getId() == R.id.filter1) {
 				app.settings.setAudioThreshold1(progress);
 				((TextView) findViewById(R.id.filter1Text)).setText(Integer.toString(progress));
 			} else if (seekBar.getId() == R.id.filter2) {
 				app.settings.setAudioThreshold2(progress);
 				((TextView) findViewById(R.id.filter2Text)).setText(Integer.toString(progress));
 			}
-			restartRecording();
 		}
 	}
 

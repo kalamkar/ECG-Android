@@ -27,6 +27,8 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	private BluetoothGattCharacteristic sensorData;
 	private BluetoothGattCharacteristic peakValue;
 
+	private int state = BluetoothProfile.STATE_DISCONNECTED;
+
     public interface ConnectionListener {
     	public void onConnect(String address);
     	public void onDisconnect(String address);
@@ -56,6 +58,8 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 
 	@Override
     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+        this.gatt = gatt;
+        this.state = newState;
         if (newState == BluetoothProfile.STATE_CONNECTED) {
         	Log.i(TAG, String.format("Connected to GATT server %s", gatt.getDevice().getAddress()));
         	gatt.discoverServices();
@@ -73,7 +77,6 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
         	Log.e(TAG, "onServicesDiscovered received: " + status);
         	return;
         }
-        this.gatt = gatt;
     	for (BluetoothGattService service : gatt.getServices()) {
     		for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
     			if ((characteristic.getProperties()
@@ -95,14 +98,6 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
     		listener.onServiceDiscovered(false);
     	}
     }
-
-    @Override
-	public void onDescriptorWrite(BluetoothGatt gatt,
-			BluetoothGattDescriptor descriptor, int status) {
-		super.onDescriptorWrite(gatt, descriptor, status);
-		Log.i(TAG, String.format("onDescriptorWrite: uuid %s status %d", descriptor.getUuid(),
-				status));
-	}
 
 	@Override
 	public void onCharacteristicRead(BluetoothGatt gatt,
@@ -127,6 +122,16 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 		super.onCharacteristicChanged(gatt, characteristic);
 	}
 
+	public boolean isConnected() {
+		return state == BluetoothProfile.STATE_CONNECTED;
+	}
+
+	public void disconnect() {
+		if (gatt != null && isConnected()) {
+			gatt.disconnect();
+		}
+	}
+
 	public boolean enableNotifications() {
 		if (peakValue == null) {
 			return false;
@@ -146,10 +151,10 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 		}
 		boolean success = true;
 		success = success && gatt.setCharacteristicNotification(peakValue, false);
-		for (BluetoothGattDescriptor descriptor : peakValue.getDescriptors()) {
-			descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
-			success = success && gatt.writeDescriptor(descriptor);
-		}
+//		for (BluetoothGattDescriptor descriptor : peakValue.getDescriptors()) {
+//			descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+//			success = success && gatt.writeDescriptor(descriptor);
+//		}
 		return success;
 	}
 }
