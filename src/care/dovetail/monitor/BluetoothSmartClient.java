@@ -22,11 +22,15 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 
 	private final Context context;
 	private final ConnectionListener listener;
+
+	private BluetoothGatt gatt;
 	private BluetoothGattCharacteristic sensorData;
+	private BluetoothGattCharacteristic peakValue;
 
     public interface ConnectionListener {
     	public void onConnect(String address);
     	public void onDisconnect(String address);
+    	public void onServiceDiscovered(boolean success);
     	public void onNewValues(float values[], boolean hasHeartBeat);
     }
 
@@ -40,7 +44,7 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 			return;
 		}
 		Log.i(TAG, String.format("Connecting to BluetoothLE device %s.", address));
-		final BluetoothManager bluetoothManager =
+		BluetoothManager bluetoothManager =
 				(BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
 		BluetoothAdapter bluetooth = bluetoothManager.getAdapter();
 
@@ -53,9 +57,8 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	@Override
     public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
         if (newState == BluetoothProfile.STATE_CONNECTED) {
-        	Log.i(TAG, String.format("Connected to GATT server %s. "
-        			+ "Attempting to start service discovery %b"
-            		, gatt.getDevice().getAddress(), gatt.discoverServices()));
+        	Log.i(TAG, String.format("Connected to GATT server %s", gatt.getDevice().getAddress()));
+        	gatt.discoverServices();
         	listener.onConnect(gatt.getDevice().getAddress());
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
         	Log.e(TAG, String.format("Disconnected from GATT server %s.",
@@ -70,26 +73,26 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
         	Log.e(TAG, "onServicesDiscovered received: " + status);
         	return;
         }
-    	Log.i(TAG, "onServicesDiscovered received: GATT_SUCCESS");
+        this.gatt = gatt;
     	for (BluetoothGattService service : gatt.getServices()) {
-    		Log.i(TAG, String.format("\nService UUID %s",
-    				Long.toHexString(service.getUuid().getMostSignificantBits())));
     		for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
-    			Log.i(TAG, String.format("Characteristic UUID %s Property %d",
-    					Long.toHexString(characteristic.getUuid().getMostSignificantBits()),
-    					characteristic.getProperties()));
     			if ((characteristic.getProperties()
     					& BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
-        			gatt.setCharacteristicNotification(characteristic, true);
-        			for (BluetoothGattDescriptor descriptor : characteristic.getDescriptors()) {
-        				descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            		    gatt.writeDescriptor(descriptor);
-        			}
+    				peakValue = characteristic;
     			} else if (Long.toHexString(characteristic.getUuid().getMostSignificantBits())
     						.startsWith(Config.BT_SENSOR_DATA_CHAR_PREFIX)) {
     				sensorData = characteristic;
     			}
     		}
+    	}
+    	if (peakValue != null && sensorData != null) {
+    		Log.i(TAG, String.format("Found PeakValue UUID %s and Sensor Data UUID %s",
+    				Long.toHexString(peakValue.getUuid().getMostSignificantBits()),
+    				Long.toHexString(sensorData.getUuid().getMostSignificantBits())));
+    		listener.onServiceDiscovered(true);
+    	} else {
+    		Log.e(TAG, "Could not find PeakValue and/or Sensor Data.");
+    		listener.onServiceDiscovered(false);
     	}
     }
 
@@ -122,5 +125,31 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
         		Arrays.toString(characteristic.getValue())));
         gatt.readCharacteristic(sensorData);
 		super.onCharacteristicChanged(gatt, characteristic);
+	}
+
+	public boolean enableNotifications() {
+		if (peakValue == null) {
+			return false;
+		}
+		boolean success = true;
+		success = success && gatt.setCharacteristicNotification(peakValue, true);
+		for (BluetoothGattDescriptor descriptor : peakValue.getDescriptors()) {
+			descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+			success = success && gatt.writeDescriptor(descriptor);
+		}
+		return success;
+	}
+
+	public boolean disableNotifications() {
+		if (peakValue == null) {
+			return false;
+		}
+		boolean success = true;
+		success = success && gatt.setCharacteristicNotification(peakValue, false);
+		for (BluetoothGattDescriptor descriptor : peakValue.getDescriptors()) {
+			descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+			success = success && gatt.writeDescriptor(descriptor);
+		}
+		return success;
 	}
 }

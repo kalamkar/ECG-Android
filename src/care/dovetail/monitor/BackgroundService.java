@@ -47,6 +47,10 @@ public class BackgroundService extends Service {
 					.putExtra(Config.SENSOR_DATA_HEARTBEAT, hasHeartBeat)
 					.putExtra(Config.SENSOR_DATA, values));
 		}
+
+		@Override
+		public void onServiceDiscovered(boolean success) {
+		}
 	};
 
 	@Override
@@ -90,7 +94,14 @@ public class BackgroundService extends Service {
 
 	@Override
 	public IBinder onBind(Intent intent) {
+		startRecording();
 		return binder;
+	}
+
+	@Override
+	public boolean onUnbind(Intent intent) {
+		stopRecording();
+		return super.onUnbind(intent);
 	}
 
 	public class LocalBinder extends Binder {
@@ -98,6 +109,18 @@ public class BackgroundService extends Service {
             return BackgroundService.this;
         }
     }
+
+	public void startRecording() {
+		if (bluetooth != null) {
+			bluetooth.enableNotifications();
+		}
+	}
+
+	public void stopRecording() {
+		if (bluetooth != null) {
+			bluetooth.disableNotifications();
+		}
+	}
 
 	public int getBeatsPerMinute() {
 		return beatCounter != null ? beatCounter.getBeatsPerMinute() : 0;
