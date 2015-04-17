@@ -14,7 +14,6 @@ public class BeatCounter {
 	private final int threshold1;
 	private final int threshold2;
 
-	private int processed[];
 	private int bpm;
 
 	public BeatCounter(int threshold1, int threshold2) {
@@ -27,8 +26,8 @@ public class BeatCounter {
 	}
 
 	@SuppressLint("UseSparseArrays")
-	public boolean process(int values[]) {
-		processed = Arrays.copyOf(values, values.length);
+	public int[] process(int values[]) {
+		int processed[] = Arrays.copyOf(values, values.length);
 
 		int sorted[] = Arrays.copyOf(values, values.length);
 		Arrays.sort(sorted);
@@ -49,10 +48,6 @@ public class BeatCounter {
 		}
 		bpm = calculateBpm(indices, values.length - 1);
 
-		return false;
-	}
-
-	public int[] getProcessed() {
 		return processed;
 	}
 

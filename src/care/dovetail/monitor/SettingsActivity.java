@@ -10,7 +10,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -31,7 +30,6 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 	private BackgroundService service;
 	private boolean serviceBound = false;
 
-	private boolean isUpdating = false;
 	private long lastChangeTime = 0;
 
 	private SeekBar threshold1;
@@ -82,15 +80,12 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
         super.onResume();
         bindService(new Intent(this, BackgroundService.class), serviceConnection,
         		Context.BIND_AUTO_CREATE);
-        isUpdating = true;
-        new Thread(new UiUpdater()).start();
         registerReceiver(receiver, new IntentFilter(Config.SERVICE_EVENT));
         registerReceiver(receiver, new IntentFilter(Config.SERVICE_DATA));
     }
 
     @Override
     protected void onStop() {
-        isUpdating = false;
         if (serviceBound) {
             unbindService(serviceConnection);
             serviceBound = false;
@@ -109,7 +104,7 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 				return;
 			}
 			int data[] = intent.getIntArrayExtra(Config.SENSOR_DATA);
-			final boolean hasHeartBeat = intent.getBooleanExtra(Config.SENSOR_DATA_HEARTBEAT, false);
+			final int bpm = intent.getIntExtra(Config.SENSOR_DATA_HEARTBEAT, 0);
 			final DataPoint[] dataPoints = new DataPoint[data == null ? 0 : data.length];
 			for (int i = 0; i < dataPoints.length; i++) {
 				dataPoints[i] = new DataPoint(i, data[i]);
@@ -118,11 +113,7 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 				@Override
 				public void run() {
 					audioDataSeries.resetData(dataPoints);
-					findViewById(R.id.beat).setBackgroundColor(
-							getResources().getColor(
-							hasHeartBeat ? android.R.color.holo_green_light :
-								android.R.color.transparent));
-					updateUi();
+					((TextView) findViewById(R.id.bpm)).setText(Integer.toString(bpm));
 				}
 			});
 		}
@@ -187,28 +178,5 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
-	}
-
-	private class UiUpdater implements Runnable {
-		@Override
-		public void run() {
-			while(isUpdating) {
-				SettingsActivity.this.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if (serviceBound && service != null) {
-							((TextView) findViewById(R.id.bpm)).setText(
-									Integer.toString(service.getBeatsPerMinute()));
-						}
-					}
-				});
-
-				try {
-					Thread.sleep(Config.UI_UPDATE_INTERVAL_MILLIS);
-				} catch (InterruptedException ex) {
-					Log.w(TAG, ex);
-				}
-			}
-		}
 	}
 }
