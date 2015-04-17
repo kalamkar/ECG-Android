@@ -1,8 +1,12 @@
 package care.dovetail.monitor;
 
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
+
 
 public class BeatCounter {
 	private static final String TAG = "BeatCounter";
@@ -10,102 +14,97 @@ public class BeatCounter {
 	private final int threshold1;
 	private final int threshold2;
 
+	private int processed[];
+	private int bpm;
+
 	public BeatCounter(int threshold1, int threshold2) {
 		this.threshold1 = threshold1;
 		this.threshold2 = threshold2;
 	}
 
-	private ArrayBlockingQueue<Long> beatTimes =
-			new ArrayBlockingQueue<Long>(Config.HEART_BEAT_HISTORY);
-	private long lastBeatTime = 0;
-
 	public int getBeatsPerMinute() {
-		long prevBeatTime = 0;
-		int delaySum = 0;
-		int delayCount = 0;
-		for (Long beatTime : beatTimes) {
-			if (prevBeatTime == 0) {
-				prevBeatTime = beatTime;
-				continue;
+		return bpm;
+	}
+
+	@SuppressLint("UseSparseArrays")
+	public boolean process(int values[]) {
+		processed = Arrays.copyOf(values, values.length);
+
+		int sorted[] = Arrays.copyOf(values, values.length);
+		Arrays.sort(sorted);
+		int median = values.length % 2 == 0 ? (sorted[(int) Math.floor(values.length / 2)]
+				+ sorted[(int) Math.ceil(values.length / 2)]) /2 : sorted[values.length / 2];
+		int max = sorted[sorted.length - 1];
+		int min = sorted[0];
+		Log.i(TAG, String.format("Min = %d, Median = %d, Max = %d", min, median, max));
+
+		List<Integer> indices = new ArrayList<Integer>();
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] > (max * 0.9)) {
+				processed[i] = values[i];
+				indices.add(i);
+			} else {
+				processed[i] = 0;
 			}
-			long delay = beatTime - prevBeatTime;
-			if (delay < Config.MAX_HEART_BEAT_DELAY && delay > Config.MIN_HEART_BEAT_DELAY) {
-				delaySum += delay;
-				delayCount++;
-			}
-			prevBeatTime = beatTime;
 		}
-		if (delaySum == 0 || delayCount == 0) {
+		bpm = calculateBpm(indices, values.length - 1);
+
+		return false;
+	}
+
+	public int[] getProcessed() {
+		return processed;
+	}
+
+	private static int calculateBpm(List<Integer> indices, int maxIndex) {
+		if (indices.size() <= 2) {
+			Log.e(TAG, "Insufficeint indices");
 			return 0;
 		}
-		return  (60 * 1000) / (delaySum / delayCount);
-	}
 
-	public boolean process(float buffer[]) {
-		final boolean hasHeartBeat = hasHeartBeat1(buffer, threshold1, threshold2);
+		int sum = 0;
+		for (int i = 1; i < indices.size(); i++) {
+			sum += indices.get(i) - indices.get(i-1);
+		}
+		int average = sum / (indices.size() -1);
 
-		// Remove stale beats
-		long currentTime = System.currentTimeMillis();
-		Long firstBeatTime = beatTimes.peek();
-		if (firstBeatTime != null && firstBeatTime
-				< (currentTime - Config.UI_UPDATE_INTERVAL_MILLIS - Config.MAX_HEART_BEAT_DELAY)) {
-			try {
-				beatTimes.take();
-			} catch (InterruptedException ex) {
-				Log.w(TAG, ex);
+//		// If first or last index falls outside of tolerance then its not good waveform
+//		if (indices.get(0) > average * 1.1) {
+//			Log.e(TAG, String.format("First distance %d falls outside of average %d.",
+//					indices.get(0), average));
+//			return -1;
+//		}
+//		if (indices.get(indices.size() - 1) < maxIndex - (average * 1.1)) {
+//			Log.e(TAG, String.format("Last distance %d falls outside of average %d.",
+//					indices.get(indices.size() - 1), average));
+//			return -1;
+//		}
+
+		List<Integer> filtered = new ArrayList<Integer>();
+		filtered.add(indices.get(0));
+		for (int i = 1; i < indices.size(); i++) {
+			// If current index is close to previous ignore it
+			if (indices.get(i-1) > indices.get(i) - (average * 0.2)) {
+				continue;
+			}
+			filtered.add(indices.get(i));
+		}
+
+		sum = 0;
+		for (int i = 1; i < filtered.size(); i++) {
+			sum += filtered.get(i) - filtered.get(i-1);
+		}
+		average = sum / (filtered.size() -1);
+
+		for (int i = 1; i < filtered.size(); i++) {
+			int distance = filtered.get(i) - filtered.get(i-1);
+			if (distance < average * 0.8 || distance > average * 1.2) {
+				// Distance falls outside of 10% tolerance of average distance
+				Log.e(TAG, String.format("Distance %d falls outside of average %d.",
+						distance, average));
+				return -1;
 			}
 		}
-
-		// listener.onNewValues(buffer, hasHeartBeat);
-
-		if (hasHeartBeat) {
-			heartBeatDetected(currentTime);
-		}
-
-		return true;
-	}
-
-	private void heartBeatDetected(long currentTime) {
-		// If this is a second sound of the heart beat (immediately following first), skip it.
-		if (currentTime - lastBeatTime < Config.MIN_HEART_BEAT_DELAY) {
-			return;
-		}
-		try {
-			if (beatTimes.size() >= Config.HEART_BEAT_HISTORY) {
-				beatTimes.take();
-			}
-			beatTimes.put(currentTime);
-			lastBeatTime = currentTime;
-			Log.v(TAG, String.format("Heartbeat time is %d", currentTime));
-		} catch (InterruptedException ex) {
-			Log.w(TAG, ex);
-		}
-	}
-
-	private static boolean hasHeartBeat1(float buffer[], int threshold1, int threshold2) {
-		boolean foundBeatPeak = false;
-		boolean foundBeatValley = false;
-		int numSamplesWithMin = 0;
-		int numSamplesWithMax = 0;
-
-		for (int i = 0; i < buffer.length; i++) {
-			if (buffer[i] == -1.0) {
-				numSamplesWithMin++;
-			} else {
-				if (numSamplesWithMin > threshold1 && numSamplesWithMin < threshold2) {
-					foundBeatValley = true;
-				}
-				numSamplesWithMin = 0;
-			}
-			if (buffer[i] == 1.0) {
-				numSamplesWithMax++;
-			} else {
-				if (numSamplesWithMax > threshold1 && numSamplesWithMax < threshold2) {
-					foundBeatPeak = true;
-				}
-				numSamplesWithMax = 0;
-			}
-		}
-		return foundBeatValley || foundBeatPeak;
+		return Math.round((60 * Config.SAMPLE_RATE) / (sum / filtered.size()));
 	}
 }

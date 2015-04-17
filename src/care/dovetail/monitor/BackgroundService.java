@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -15,7 +16,7 @@ import care.dovetail.common.model.Event;
 import care.dovetail.monitor.BluetoothSmartClient.ConnectionListener;
 
 @SuppressLint("NewApi")
-public class BackgroundService extends Service {
+public class BackgroundService extends Service implements OnSharedPreferenceChangeListener {
 	private static final String TAG = "BackgroundService";
 
 	private App app;
@@ -41,10 +42,11 @@ public class BackgroundService extends Service {
 		}
 
 		@Override
-		public void onNewValues(float values[], boolean hasHeartBeat) {
+		public void onNewValues(int values[]) {
+			boolean hasHeartBeat = beatCounter.process(values);
 			sendBroadcast(new Intent(Config.SERVICE_DATA)
 					.putExtra(Config.SENSOR_DATA_HEARTBEAT, hasHeartBeat)
-					.putExtra(Config.SENSOR_DATA, values));
+					.putExtra(Config.SENSOR_DATA, values /* beatCounter.getProcessed()*/ ));
 		}
 
 		@Override
@@ -57,6 +59,9 @@ public class BackgroundService extends Service {
 		super.onCreate();
 		app = (App) getApplication();
 		prefs = getSharedPreferences(getPackageName(), MODE_PRIVATE);
+		prefs.registerOnSharedPreferenceChangeListener(this);
+		beatCounter = new BeatCounter(app.settings.getAudioThreshold1(),
+				app.settings.getAudioThreshold2());
 
 		showNotification(R.string.app_name, R.string.baby_monitor_is_not_working,
 				Event.Type.SERVICE_STARTED.name(), R.drawable.ic_service_error);
@@ -97,29 +102,39 @@ public class BackgroundService extends Service {
 			return;
 		}
 		bluetooth = new BluetoothSmartClient(app, listener);
-		prefs.registerOnSharedPreferenceChangeListener(
-				new SharedPreferences.OnSharedPreferenceChangeListener() {
-					@Override
-					public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-						bluetooth.disconnect();
-						bluetooth.connectToDevice(app.settings.getBluetoothAddress());
-					}});
 		bluetooth.connectToDevice(app.settings.getBluetoothAddress());
 	}
 
-	public void startRecording() {
-		if (bluetooth != null && bluetooth.isConnected() && bluetooth.enableNotifications()) {
-			Log.i(TAG, "Enabled notifications from Bluetooth device");
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+		if (bluetooth != null && Settings.BT_REMOTE_ADDRESS.equals(key)) {
+			bluetooth.disconnect();
+			bluetooth.connectToDevice(app.settings.getBluetoothAddress());
 		} else {
-			Log.e(TAG, "Failed to enable notifications from Bluetooth device");
+			beatCounter = new BeatCounter(app.settings.getAudioThreshold1(),
+					app.settings.getAudioThreshold2());
+		}
+	}
+
+	public void startRecording() {
+		if (bluetooth != null && bluetooth.isConnected()) {
+			if (bluetooth.enableNotifications()) {
+				Log.i(TAG, "Enabled notifications from Bluetooth device");
+			} else {
+				Log.e(TAG, "Failed to enable notifications from Bluetooth device");
+			}
+		} else {
+			initBluetooth();
 		}
 	}
 
 	public void stopRecording() {
-		if (bluetooth != null && bluetooth.isConnected() && bluetooth.disableNotifications()) {
-			Log.i(TAG, "Disabled notifications from Bluetooth device");
-		} else {
-			Log.e(TAG, "Failed to disable notifications from Bluetooth device");
+		if (bluetooth != null && bluetooth.isConnected()) {
+			if (bluetooth.disableNotifications()) {
+				Log.i(TAG, "Disabled notifications from Bluetooth device");
+			} else {
+				Log.e(TAG, "Failed to disable notifications from Bluetooth device");
+			}
 		}
 	}
 

@@ -66,7 +66,7 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
     	graph.getViewport().setXAxisBoundsManual(true);
 		graph.getViewport().setMaxX(512);
 		graph.getViewport().setYAxisBoundsManual(true);
-		graph.getViewport().setMaxY(1.0);
+		graph.getViewport().setMaxY(256.0);
 		graph.getViewport().setMinY(0.0);
 
 		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -108,7 +108,7 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 			if (intent == null) {
 				return;
 			}
-			float data[] = intent.getFloatArrayExtra(Config.SENSOR_DATA);
+			int data[] = intent.getIntArrayExtra(Config.SENSOR_DATA);
 			final boolean hasHeartBeat = intent.getBooleanExtra(Config.SENSOR_DATA_HEARTBEAT, false);
 			final DataPoint[] dataPoints = new DataPoint[data == null ? 0 : data.length];
 			for (int i = 0; i < dataPoints.length; i++) {

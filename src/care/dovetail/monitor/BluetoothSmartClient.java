@@ -33,7 +33,7 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
     	public void onConnect(String address);
     	public void onDisconnect(String address);
     	public void onServiceDiscovered(boolean success);
-    	public void onNewValues(float values[], boolean hasHeartBeat);
+    	public void onNewValues(int values[]);
     }
 
 	public BluetoothSmartClient(Context context, ConnectionListener listener) {
@@ -103,13 +103,12 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	public void onCharacteristicRead(BluetoothGatt gatt,
 			BluetoothGattCharacteristic characteristic, int status) {
 		byte[] values = characteristic.getValue();
-		Log.i(TAG, String.format("onCharacteristicRead new data: %s",
-        		Arrays.toString(values)));
-		float floatValues[] = new float[values.length];
+		int intValues[] = new int[values.length];
 		for (int i = 0; i < values.length; i++) {
-			floatValues[i] = (float) ((values[i]) & 0xFF ) / 255;
+			intValues[i] = values[i] & 0xFF;
 		}
-		listener.onNewValues(floatValues, false);
+//		Log.i(TAG, String.format("onCharacteristicRead new data: %s", Arrays.toString(intValues)));
+		listener.onNewValues(intValues);
 		super.onCharacteristicRead(gatt, characteristic, status);
 	}
 
@@ -124,6 +123,10 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 
 	public boolean isConnected() {
 		return state == BluetoothProfile.STATE_CONNECTED;
+	}
+
+	public String getDevice() {
+		return gatt == null ? "" : gatt.getDevice().getAddress();
 	}
 
 	public void disconnect() {
