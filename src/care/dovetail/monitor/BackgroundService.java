@@ -46,7 +46,7 @@ public class BackgroundService extends Service implements OnSharedPreferenceChan
 			int processed[] = beatCounter.process(values);
 			sendBroadcast(new Intent(Config.SERVICE_DATA)
 					.putExtra(Config.SENSOR_DATA_HEARTBEAT, beatCounter.getBeatsPerMinute())
-					.putExtra(Config.SENSOR_DATA, values /* beatCounter.getProcessed()*/ ));
+					.putExtra(Config.SENSOR_DATA, processed));
 		}
 
 		@Override

@@ -79,7 +79,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignLeft="@+id/filter1"
                     android:layout_below="@+id/filter1"
-                    android:text="@string/min_samples"
+                    android:text="@string/threshold1"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
             </RelativeLayout>
 
@@ -113,7 +113,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignLeft="@+id/filter2"
                     android:layout_below="@+id/filter2"
-                    android:text="@string/max_samples"
+                    android:text="@string/threshold2"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
             </RelativeLayout>
         </LinearLayout>

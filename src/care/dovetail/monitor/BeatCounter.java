@@ -1,8 +1,9 @@
 package care.dovetail.monitor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import org.jtransforms.fft.DoubleFFT_1D;
 
 import android.annotation.SuppressLint;
 import android.util.Log;
@@ -14,11 +15,14 @@ public class BeatCounter {
 	private final int threshold1;
 	private final int threshold2;
 
+	private final DoubleFFT_1D transformer = new DoubleFFT_1D(256);
+
 	private int bpm;
 
 	public BeatCounter(int threshold1, int threshold2) {
 		this.threshold1 = threshold1;
 		this.threshold2 = threshold2;
+		Log.i(TAG, String.format("Created with thresholds %d and %d", threshold1, threshold2));
 	}
 
 	public int getBeatsPerMinute() {
@@ -27,28 +31,42 @@ public class BeatCounter {
 
 	@SuppressLint("UseSparseArrays")
 	public int[] process(int values[]) {
-		int processed[] = Arrays.copyOf(values, values.length);
-
-		int sorted[] = Arrays.copyOf(values, values.length);
-		Arrays.sort(sorted);
-		int median = values.length % 2 == 0 ? (sorted[(int) Math.floor(values.length / 2)]
-				+ sorted[(int) Math.ceil(values.length / 2)]) /2 : sorted[values.length / 2];
-		int max = sorted[sorted.length - 1];
-		int min = sorted[0];
-		Log.i(TAG, String.format("Min = %d, Median = %d, Max = %d", min, median, max));
-
-		List<Integer> indices = new ArrayList<Integer>();
+		double transformed[] = new double[values.length];
 		for (int i = 0; i < values.length; i++) {
-			if (values[i] > (max * 0.9)) {
-				processed[i] = values[i];
-				indices.add(i);
-			} else {
-				processed[i] = 0;
-			}
+			transformed[i] = values[i];
 		}
-		bpm = calculateBpm(indices, values.length - 1);
+		transformer.complexForward(transformed);
+		for (int i = threshold1; i < transformed.length - threshold1; i++) {
+			transformed[i] = 0;
+		}
+		transformer.complexInverse(transformed, true);
+		for (int i = 0; i < values.length; i++) {
+			values[i] = (int) Math.round(transformed[i]);
+		}
+		return values;
 
-		return processed;
+//		int processed[] = Arrays.copyOf(values, values.length);
+//
+//		int sorted[] = Arrays.copyOf(values, values.length);
+//		Arrays.sort(sorted);
+//		int median = values.length % 2 == 0 ? (sorted[(int) Math.floor(values.length / 2)]
+//				+ sorted[(int) Math.ceil(values.length / 2)]) /2 : sorted[values.length / 2];
+//		int max = sorted[sorted.length - 1];
+//		int min = sorted[0];
+//		Log.i(TAG, String.format("Min = %d, Median = %d, Max = %d", min, median, max));
+//
+//		List<Integer> indices = new ArrayList<Integer>();
+//		for (int i = 0; i < values.length; i++) {
+//			if (values[i] > (max * 0.9)) {
+//				processed[i] = values[i];
+//				indices.add(i);
+//			} else {
+//				processed[i] = 0;
+//			}
+//		}
+//		bpm = calculateBpm(indices, values.length - 1);
+//
+//		return processed;
 	}
 
 	private static int calculateBpm(List<Integer> indices, int maxIndex) {

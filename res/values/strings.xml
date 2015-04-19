@@ -16,8 +16,8 @@
     <string name="compress">Compress</string>
     <string name="filter_threshold">Filter Threshold</string>
     <string name="gain">Gain</string>
-    <string name="min_samples">Min Samples</string>
-    <string name="max_samples">Max Samples</string>
+    <string name="threshold1">Threshold1</string>
+    <string name="threshold2">Threshold2</string>
     <string name="beat">beat</string>
     <string name="record_kick">Record Kick</string>
     

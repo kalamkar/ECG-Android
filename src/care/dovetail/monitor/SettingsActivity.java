@@ -102,6 +102,7 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 				return;
 			}
 			int data[] = intent.getIntArrayExtra(Config.SENSOR_DATA);
+			// Log.i(TAG, Arrays.toString(data));
 			final int bpm = intent.getIntExtra(Config.SENSOR_DATA_HEARTBEAT, 0);
 			final DataPoint[] dataPoints = new DataPoint[data == null ? 0 : data.length];
 			for (int i = 0; i < dataPoints.length; i++) {
