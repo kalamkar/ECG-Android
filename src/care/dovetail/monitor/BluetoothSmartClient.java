@@ -42,7 +42,8 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	}
 
 	public void connectToDevice(String address) {
-		if (address == null) {
+		if (address == null || address.isEmpty()) {
+			Log.e(TAG, "No BluetoothLE device selected.");
 			return;
 		}
 		Log.i(TAG, String.format("Connecting to BluetoothLE device %s.", address));

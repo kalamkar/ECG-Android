@@ -63,6 +63,9 @@ public class MainActivity extends FragmentActivity {
 		case R.id.action_settings:
 			startActivity(new Intent(this, SettingsActivity.class));
 			break;
+		case R.id.action_disconnect:
+			app.settings.setBluetoothAddress("");
+			break;
 		case R.id.action_wipe_db:
 			app.events.reset();
 			reloadEvents();

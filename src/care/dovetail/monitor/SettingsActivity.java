@@ -45,8 +45,6 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 
 		app = (App) getApplication();
 
-        startService(new Intent(this, BackgroundService.class));
-
 		threshold1 = (SeekBar) findViewById(R.id.filter1);
 		threshold2 = (SeekBar) findViewById(R.id.filter2);
 

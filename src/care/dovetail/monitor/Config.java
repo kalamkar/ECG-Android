@@ -22,14 +22,9 @@ public class Config {
 
 	public static final int EVENT_SYNC_INTERVAL_MILLIS = 60 * 1000;
 
-	public static final int SAMPLE_RATE = 100;
+	public static final int SAMPLE_RATE = 200;
 
 	public static final int UI_UPDATE_INTERVAL_MILLIS = 10000;
-
-	public static final int MIN_HEART_BEAT_DELAY = 200;
-	public static final int MAX_HEART_BEAT_DELAY = 2000;
-	public static final int HEART_BEAT_HISTORY =
-			Config.UI_UPDATE_INTERVAL_MILLIS / MIN_HEART_BEAT_DELAY;
 
 	public static final SimpleDateFormat EVENT_TIME_FORMAT =
 			new SimpleDateFormat("hh:mm:ssaa, MMM dd yyyy", Locale.US);
