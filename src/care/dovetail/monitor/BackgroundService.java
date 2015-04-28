@@ -95,14 +95,12 @@ public class BackgroundService extends Service implements OnSharedPreferenceChan
     }
 
 	private void initBluetooth() {
-		if (bluetooth != null) {
-			if (!bluetooth.isConnected()) {
-				bluetooth.connectToDevice(app.settings.getBluetoothAddress());
-			}
-			return;
+		if (bluetooth == null) {
+			bluetooth = new BluetoothSmartClient(app, listener);
+			bluetooth.connectToDevice(app.settings.getBluetoothAddress());
+		} else if (!bluetooth.isConnected()) {
+			bluetooth.connectToDevice(app.settings.getBluetoothAddress());
 		}
-		bluetooth = new BluetoothSmartClient(app, listener);
-		bluetooth.connectToDevice(app.settings.getBluetoothAddress());
 	}
 
 	@Override

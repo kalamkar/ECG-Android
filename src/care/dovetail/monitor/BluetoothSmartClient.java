@@ -23,6 +23,8 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	private final Context context;
 	private final ConnectionListener listener;
 
+	private final BluetoothAdapter adapter;
+
 	private BluetoothGatt gatt;
 	private BluetoothGattCharacteristic sensorData;
 	private BluetoothGattCharacteristic peakValue;
@@ -39,6 +41,9 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	public BluetoothSmartClient(Context context, ConnectionListener listener) {
 		this.context = context;
 		this.listener = listener;
+		BluetoothManager bluetoothManager =
+				(BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+		adapter = bluetoothManager.getAdapter();
 	}
 
 	public void connectToDevice(String address) {
@@ -46,13 +51,9 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 			Log.e(TAG, "No BluetoothLE device selected.");
 			return;
 		}
-		Log.i(TAG, String.format("Connecting to BluetoothLE device %s.", address));
-		BluetoothManager bluetoothManager =
-				(BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
-		BluetoothAdapter bluetooth = bluetoothManager.getAdapter();
-
-		if (bluetooth != null && bluetooth.isEnabled()) {
-			BluetoothDevice device = bluetooth.getRemoteDevice(address);
+		if (adapter != null && adapter.isEnabled()) {
+			Log.i(TAG, String.format("Connecting to BluetoothLE device %s.", address));
+			BluetoothDevice device = adapter.getRemoteDevice(address);
 			device.connectGatt(context, true, this);
 		}
 	}
