@@ -31,7 +31,7 @@ public class SyncTask extends TimerTask {
 	public void run() {
 		for (Event event : app.events.getLatest(app.getLastSyncTime())) {
 			new AddEvent(event).execute();
-			Log.i(TAG, String.format("Adding event %s %d", event.type, event.timeMillis));
+			Log.i(TAG, String.format("Adding event %s %d", event.type, event.time));
 		}
 	}
 
@@ -49,7 +49,7 @@ public class SyncTask extends TimerTask {
 			List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
 			queryParams.add(new BasicNameValuePair("device_id", app.getDeviceId()));
 			queryParams.add(new BasicNameValuePair("type", event.type));
-			queryParams.add(new BasicNameValuePair("time", Long.toString(event.timeMillis)));
+			queryParams.add(new BasicNameValuePair("time", Long.toString(event.time)));
 			for (Pair<String, String> param : params) {
 				queryParams.add(new BasicNameValuePair(param.first, param.second));
 			}
@@ -62,8 +62,8 @@ public class SyncTask extends TimerTask {
 		protected void onPostExecute(ApiResponse result) {
 			super.onPostExecute(result);
 			if (result != null && "OK".equalsIgnoreCase(result.code)
-					&& app.getLastSyncTime() < event.timeMillis) {
-				app.setLastSyncTime(event.timeMillis);
+					&& app.getLastSyncTime() < event.time) {
+				app.setLastSyncTime(event.time);
 			} else if (result != null && !"OK".equalsIgnoreCase(result.code)) {
 				Log.e(TAG, String.format("Failed to add %s %s", event.type, result.message));
 			}

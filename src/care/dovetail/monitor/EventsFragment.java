@@ -122,7 +122,7 @@ public class EventsFragment extends Fragment {
 				((TextView) view.findViewById(R.id.title)).setText(title);
 			}
 			((TextView) view.findViewById(R.id.hint)).setText(
-					Config.EVENT_TIME_FORMAT.format(new Date(event.timeMillis)));
+					Config.EVENT_TIME_FORMAT.format(new Date(event.time)));
 			return view;
 		}
 	}

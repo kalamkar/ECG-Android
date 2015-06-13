@@ -44,7 +44,7 @@ public class EventDB extends SQLiteOpenHelper {
 
 	public void add(Event event) {
 	    ContentValues contentValues = new ContentValues();
-	    contentValues.put(EVENTS_TIME, event.timeMillis);
+	    contentValues.put(EVENTS_TIME, event.time);
 	    contentValues.put(EVENTS_TYPE, event.type);
 	    if (event.extra != null) {
 	    	contentValues.put(EVENTS_EXTRA, event.extra);
