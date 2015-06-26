@@ -1,5 +1,7 @@
 package care.dovetail.monitor;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -10,6 +12,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Pair;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
@@ -22,6 +25,7 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer.GridStyle;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+import com.jjoe64.graphview.series.PointsGraphSeries;
 
 public class SettingsActivity extends Activity implements OnSeekBarChangeListener {
 	private static final String TAG = "SettingsActivity";
@@ -36,7 +40,8 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 	private SeekBar threshold2;
 	private GraphView graph;
 
-	LineGraphSeries<DataPoint> audioDataSeries;
+	LineGraphSeries<DataPoint> audioDataSeries = new LineGraphSeries<DataPoint>();
+	PointsGraphSeries<DataPoint> peakDataSeries = new PointsGraphSeries<DataPoint>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +54,10 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 		threshold2 = (SeekBar) findViewById(R.id.filter2);
 
 		graph = ((GraphView) findViewById(R.id.graph));
-		audioDataSeries = new LineGraphSeries<DataPoint>();
 		graph.addSeries(audioDataSeries);
+		graph.addSeries(peakDataSeries);
+		peakDataSeries.setSize(10);
+		peakDataSeries.setColor(getResources().getColor(android.R.color.holo_orange_dark));
 		graph.getGridLabelRenderer().setGridStyle(GridStyle.NONE);
 		graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
 			@Override
@@ -102,17 +109,25 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 				return;
 			}
 			int data[] = intent.getIntArrayExtra(Config.SENSOR_DATA);
+			List<Pair<Integer, Integer>> peaks = new PeakDetector(app.settings.getAudioThreshold1(),
+					app.settings.getAudioThreshold2()).findPeaks(data);
 			// Log.i(TAG, Arrays.toString(data));
 			final int bpm = intent.getIntExtra(Config.SENSOR_DATA_HEARTBEAT, 0);
 			final DataPoint[] dataPoints = new DataPoint[data == null ? 0 : data.length];
 			for (int i = 0; i < dataPoints.length; i++) {
 				dataPoints[i] = new DataPoint(i, data[i]);
 			}
+			final DataPoint[] peakPoints = new DataPoint[peaks.size()];
+			for (int i = 0; i < peakPoints.length; i++) {
+				Pair<Integer, Integer> peak = peaks.get(i);
+				peakPoints[i] = new DataPoint(peak.first, peak.second);
+			}
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					audioDataSeries.resetData(dataPoints);
-					((TextView) findViewById(R.id.bpm)).setText(Integer.toString(bpm));
+					peakDataSeries.resetData(peakPoints);
+					((TextView) findViewById(R.id.bpm)).setText(Integer.toString(peakPoints.length));
 				}
 			});
 		}
@@ -177,5 +192,22 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
+	}
+
+	private static Pair<Integer,Integer> getFrequency(List<Pair<Integer,Integer>> peaks) {
+		if (peaks.size() == 0) {
+			return Pair.create(0, 0);
+		}
+		int ampSum = 0;
+		int freqSum = 0;
+		int prevIndex = -1;
+		for (Pair<Integer,Integer> peak : peaks) {
+			ampSum += peak.second;
+			if (prevIndex >= 0) {
+				freqSum += peak.first - prevIndex;
+				prevIndex = peak.first;
+			}
+		}
+		return Pair.create(peaks.size() > 1 ? freqSum / peaks.size() - 1 : 0, ampSum / peaks.size());
 	}
 }
