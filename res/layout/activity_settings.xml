@@ -38,12 +38,12 @@
                 android:id="@+id/textView1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/peaks"
+                android:text="@string/bpm"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
         </LinearLayout>
         
         <LinearLayout
-            android:id="@+id/frequency"
+            android:id="@+id/peaksBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/beat"
@@ -52,17 +52,17 @@
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/freq"
+                android:id="@+id/peaks"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <TextView
-                android:id="@+id/freqText"
+                android:id="@+id/peaksText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/freq"
+                android:text="@string/peaks"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
         </LinearLayout>
         
@@ -70,7 +70,7 @@
             android:id="@+id/amplitude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/frequency"
+            android:layout_toRightOf="@+id/peaksBox"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:orientation="vertical" >

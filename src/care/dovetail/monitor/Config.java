@@ -23,6 +23,7 @@ public class Config {
 	public static final int EVENT_SYNC_INTERVAL_MILLIS = 60 * 1000;
 
 	public static final int SAMPLE_RATE = 200;
+	public static final int SAMPLE_INTERVAL_MS = 10;
 
 	public static final int UI_UPDATE_INTERVAL_MILLIS = 10000;
 

@@ -43,6 +43,14 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 	LineGraphSeries<DataPoint> audioDataSeries = new LineGraphSeries<DataPoint>();
 	PointsGraphSeries<DataPoint> peakDataSeries = new PointsGraphSeries<DataPoint>();
 
+	private static class Stats {
+		int bpm;
+		int peakCount;
+		int averageAmplitude;
+		int peaksDurationMillis;
+		int signalDurationMillis;
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -111,8 +119,8 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 			int data[] = intent.getIntArrayExtra(Config.SENSOR_DATA);
 			List<Pair<Integer, Integer>> peaks = new PeakDetector(app.settings.getAudioThreshold1(),
 					app.settings.getAudioThreshold2()).findPeaks(data);
+			final Stats stats = getSignalStats(peaks);
 			// Log.i(TAG, Arrays.toString(data));
-			final int bpm = intent.getIntExtra(Config.SENSOR_DATA_HEARTBEAT, 0);
 			final DataPoint[] dataPoints = new DataPoint[data == null ? 0 : data.length];
 			for (int i = 0; i < dataPoints.length; i++) {
 				dataPoints[i] = new DataPoint(i, data[i]);
@@ -127,7 +135,11 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 				public void run() {
 					audioDataSeries.resetData(dataPoints);
 					peakDataSeries.resetData(peakPoints);
-					((TextView) findViewById(R.id.bpm)).setText(Integer.toString(peakPoints.length));
+					((TextView) findViewById(R.id.bpm)).setText(Integer.toString(stats.bpm));
+					((TextView) findViewById(R.id.peaks)).setText(
+							Integer.toString(stats.peakCount));
+					((TextView) findViewById(R.id.amp)).setText(
+							Integer.toString(stats.averageAmplitude));
 				}
 			});
 		}
@@ -194,20 +206,32 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 	public void onStopTrackingTouch(SeekBar seekBar) {
 	}
 
-	private static Pair<Integer,Integer> getFrequency(List<Pair<Integer,Integer>> peaks) {
+	private static Stats getSignalStats(List<Pair<Integer,Integer>> peaks) {
+		Stats stats = new Stats();
+		stats.peakCount = peaks.size();
 		if (peaks.size() == 0) {
-			return Pair.create(0, 0);
+			return stats;
+		} else if (peaks.size() == 1) {
+			stats.averageAmplitude = peaks.get(0).second;
+			return stats;
 		}
 		int ampSum = 0;
-		int freqSum = 0;
+		int distanceSum = 0;
 		int prevIndex = -1;
 		for (Pair<Integer,Integer> peak : peaks) {
 			ampSum += peak.second;
-			if (prevIndex >= 0) {
-				freqSum += peak.first - prevIndex;
-				prevIndex = peak.first;
-			}
+			distanceSum += prevIndex >= 0 ? peak.first - prevIndex : 0;
+			prevIndex = peak.first;
 		}
-		return Pair.create(peaks.size() > 1 ? freqSum / peaks.size() - 1 : 0, ampSum / peaks.size());
+		int totalPeaksDistance = peaks.get(peaks.size() - 1).first - peaks.get(0).first;
+		stats.peaksDurationMillis =  totalPeaksDistance * Config.SAMPLE_INTERVAL_MS;
+
+		int avgPeakDistance = distanceSum / (peaks.size() - 1);
+		int avgPeakCount = avgPeakDistance == 0 ? 0 : totalPeaksDistance / avgPeakDistance;
+
+		// Returns BPM and Average amplitude
+		stats.bpm = 60 * 1000 * avgPeakCount / stats.peaksDurationMillis;
+		stats.averageAmplitude = ampSum / peaks.size();
+		return stats;
 	}
 }
