@@ -1,8 +1,6 @@
 package care.dovetail.monitor;
 
 
-import java.util.Arrays;
-
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -47,7 +45,6 @@ public class BackgroundService extends Service implements OnSharedPreferenceChan
 		public void onNewValues(int values[]) {
 			// int processed[] = beatCounter.process(values);
 			// int minmax[] = new MinimaMaximaDetector().process(processed);
-			Log.i(TAG, Arrays.toString(values));
 			sendBroadcast(new Intent(Config.SERVICE_DATA)
 					.putExtra(Config.SENSOR_DATA_HEARTBEAT, beatCounter.getBeatsPerMinute())
 					.putExtra(Config.SENSOR_DATA, values));

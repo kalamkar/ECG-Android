@@ -16,6 +16,8 @@
     <string name="peaks">peaks</string>
     <string name="freq">freq</string>
     <string name="amp">amp</string>
+    <string name="mean">mean</string>
+    
     <string name="compress">Compress</string>
     <string name="filter_threshold">Filter Threshold</string>
     <string name="gain">Gain</string>
