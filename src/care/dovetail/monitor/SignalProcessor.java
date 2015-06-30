@@ -2,10 +2,12 @@ package care.dovetail.monitor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.util.Log;
-import android.util.Pair;
+import care.dovetail.monitor.SignalProcessor.FeaturePoint.Type;
 
 public class SignalProcessor {
 	private static final String TAG = "PeakDetector";
@@ -14,17 +16,48 @@ public class SignalProcessor {
 	private final int halfWindow;
 	private final int minSlope;
 
-	public final List<Pair<Integer, Integer>> peaks = new ArrayList<Pair<Integer, Integer>>();
-	public final List<Pair<Integer, Integer>> valleys = new ArrayList<Pair<Integer, Integer>>();
+	public final List<FeaturePoint> features = new ArrayList<FeaturePoint>();
 
-	private int values[];
+	public int values[];
 
-	public int bpm;
-	public int peakCount;
-	public int avgPeakAmplitude;
+	public int minAmplitude;
 	public int medianAmplitude;
-	public int peaksDurationMillis;
+	public int maxAmplitude;
 	public int signalDurationMillis;
+
+	public Map<FeaturePoint.Type, Integer> bpm = new HashMap<FeaturePoint.Type, Integer>();
+	public Map<FeaturePoint.Type, Integer> count = new HashMap<FeaturePoint.Type, Integer>();
+	public Map<FeaturePoint.Type, Integer> avgAmp = new HashMap<FeaturePoint.Type, Integer>();
+	public Map<FeaturePoint.Type, Integer> sumAmp = new HashMap<FeaturePoint.Type, Integer>();
+	public Map<FeaturePoint.Type, Integer> sumDistance = new HashMap<FeaturePoint.Type, Integer>();
+	public Map<FeaturePoint.Type, Integer> totalDuration = new HashMap<FeaturePoint.Type, Integer>();
+
+	public static class FeaturePoint {
+		public enum Type {
+			PEAK,
+			VALLEY
+		}
+
+		public Type type;
+		public int index;
+		public int amplitude;
+		public int slope;
+
+		public FeaturePoint(Type type, int index, int amplitude) {
+			this.type = type;
+			this.index = index;
+			this.amplitude = amplitude;
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (other == null || !(other instanceof FeaturePoint)) {
+				return false;
+			}
+			FeaturePoint otherPt = (FeaturePoint) other;
+			return index == otherPt.index && type == otherPt.type;
+		}
+	}
 
 	public SignalProcessor(int windowSize, int minSlope) {
 		this.windowSize = windowSize;
@@ -33,24 +66,36 @@ public class SignalProcessor {
 	}
 
 	public void update(int[] values) {
-		peaks.clear();
-		valleys.clear();
+		features.clear();
 		resetStats();
 
-		if (values == null) {
+		if (values == null || values.length == 0) {
 			return;
 		}
 		this.values = values;
 
 		int copyOfValues[] = values.clone();
 		Arrays.sort(copyOfValues);
+		minAmplitude = copyOfValues[0];
 		medianAmplitude = copyOfValues[copyOfValues.length / 2];
+		maxAmplitude = copyOfValues[copyOfValues.length -1];
+		signalDurationMillis =  values.length * Config.SAMPLE_INTERVAL_MS;
 
-		findPeaksValleys();
+		findFeaturePoints();
 		updateStats();
 	}
 
-	private void findPeaksValleys() {
+	public List<FeaturePoint> getFeaturePoints(Type type) {
+		List<FeaturePoint> points = new ArrayList<FeaturePoint>();
+		for (FeaturePoint fp : features) {
+			if (type != null && type.equals(fp.type)) {
+				points.add(fp);
+			}
+		}
+		return points;
+	}
+
+	private void findFeaturePoints() {
 		for (int i = 0; i < values.length; i++) {
 	        int left = i >= halfWindow  ? i - halfWindow : 0;
 	        int right = i <= values.length - halfWindow ? i + halfWindow : values.length -1;
@@ -58,44 +103,36 @@ public class SignalProcessor {
 
 	        int window[] = Arrays.copyOfRange(values, left, right);
 	        if (isPeak(i) && isSpike(values[i], window, true)) {
-
-	        	if (peaks.size() > 0) {
-	        		Pair<Integer, Integer> prevPeak = peaks.get(peaks.size() -1);
-
-		            if (prevPeak.first > (i - halfWindow)) {
-		                Log.i(TAG, String.format("Peak within window of %d with val %d, %d val = %d",
-		                		i, values[i], prevPeak.first, prevPeak.second));
-
-		                // Successive peak, keep only highest
-		                if (prevPeak.second < values[i]) {
-		                	Log.i(TAG, "replacing peak");
-		                	peaks.remove(prevPeak);
-		                	peaks.add(Pair.create(i, values[i]));
-		                }
-		                continue;
-		            }
+	        	FeaturePoint prevPeak = findPreviousFeature(Type.PEAK, i - halfWindow);
+	        	if (prevPeak != null) {
+	        		Log.i(TAG, String.format("Peak within window of %d with val %d, %d val = %d",
+	        				i, values[i], prevPeak.index, prevPeak.amplitude));
+	                // Successive peak, keep only highest
+	                if (prevPeak.amplitude < values[i]) {
+	                	Log.i(TAG, "replacing peak");
+	                	features.remove(prevPeak);
+	                	features.add(new FeaturePoint(Type.PEAK, i, values[i]));
+	                }
+	                continue;
 	        	}
-	        	peaks.add(Pair.create(i, values[i]));
+	        	features.add(new FeaturePoint(Type.PEAK, i, values[i]));
 	        }
 
 	        if (isValley(i) && isSpike(values[i], window, false)) {
-	        	if (valleys.size() > 0) {
-	        		Pair<Integer, Integer> prevValley = valleys.get(valleys.size() -1);
+	        	FeaturePoint prevValley = findPreviousFeature(Type.VALLEY, i - halfWindow);
+	        	if (prevValley != null) {
+	                Log.i(TAG, String.format("Valley within window of %d with val %d, %d val = %d",
+	                		i, values[i], prevValley.index, prevValley.amplitude));
 
-		            if (prevValley.first > (i - halfWindow)) {
-		                Log.i(TAG, String.format("Valley within window of %d with val %d, %d val = %d",
-		                		i, values[i], prevValley.first, prevValley.second));
-
-		                // Successive valley, keep only lowest
-		                if (prevValley.second > values[i]) {
-		                	Log.i(TAG, "replacing valley");
-		                	valleys.remove(prevValley);
-		                	valleys.add(Pair.create(i, values[i]));
-		                }
-		                continue;
-		            }
+	                // Successive valley, keep only lowest
+	                if (prevValley.amplitude > values[i]) {
+	                	Log.i(TAG, "replacing valley");
+	                	features.remove(prevValley);
+	                	features.add(new FeaturePoint(Type.VALLEY, i, values[i]));
+	                }
+	                continue;
 	        	}
-	        	valleys.add(Pair.create(i, values[i]));
+	        	features.add(new FeaturePoint(Type.VALLEY, i, values[i]));
 	        }
 		}
 	}
@@ -124,38 +161,45 @@ public class SignalProcessor {
 	}
 
 	private void resetStats() {
-		bpm = 0;
-		peakCount = 0;
-		avgPeakAmplitude = 0;
 		medianAmplitude = 0;
-		peaksDurationMillis = 0;
 		signalDurationMillis = 0;
+
+		for (Type type : FeaturePoint.Type.values()) {
+			count.put(type, 0);
+			sumAmp.put(type, 0);
+			sumDistance.put(type, 0);
+			bpm.put(type, 0);
+			avgAmp.put(type, 0);
+			totalDuration.put(type, 0);
+		}
 	}
 
 	private void updateStats() {
-		peakCount = peaks.size();
-		if (peaks.size() == 0) {
-			return;
-		} else if (peaks.size() == 1) {
-			avgPeakAmplitude = peaks.get(0).second - medianAmplitude;
-			return;
+		Map<FeaturePoint.Type, Integer> prevIndex = new HashMap<FeaturePoint.Type, Integer>();
+		for (FeaturePoint fp : features) {
+			count.put(fp.type, count.get(fp.type) + 1);
+			sumAmp.put(fp.type, sumAmp.get(fp.type) + Math.abs(fp.amplitude - medianAmplitude));
+			if (prevIndex.containsKey(fp.type)) {
+				sumDistance.put(fp.type, sumDistance.get(fp.type) + fp.index - prevIndex.get(fp.type));
+			}
+			prevIndex.put(fp.type, fp.index);
 		}
-		int ampSum = 0;
-		int distanceSum = 0;
-		int prevIndex = -1;
-		for (Pair<Integer,Integer> peak : peaks) {
-			ampSum += peak.second;
-			distanceSum += prevIndex >= 0 ? peak.first - prevIndex : 0;
-			prevIndex = peak.first;
+		for (Type type : FeaturePoint.Type.values()) {
+			int duration = sumDistance.get(type) * Config.SAMPLE_INTERVAL_MS;
+			totalDuration.put(type, duration);
+			bpm.put(type, duration == 0 ? 0 : 60 * 1000 * count.get(type) / duration);
+			avgAmp.put(type, count.get(type) == 0 ? 0 :
+				(sumAmp.get(type) / count.get(type)) - medianAmplitude);
 		}
-		int totalPeaksDistance = peaks.get(peaks.size() - 1).first - peaks.get(0).first;
-		peaksDurationMillis =  totalPeaksDistance * Config.SAMPLE_INTERVAL_MS;
+	}
 
-		int avgPeakDistance = distanceSum / (peaks.size() - 1);
-		int avgPeakCount = avgPeakDistance == 0 ? 0 : totalPeaksDistance / avgPeakDistance;
-
-		// Returns BPM and Average amplitude
-		bpm = 60 * 1000 * avgPeakCount / peaksDurationMillis;
-		avgPeakAmplitude = (ampSum / peaks.size()) - medianAmplitude;
+	private FeaturePoint findPreviousFeature(Type type, int minIndex) {
+		for (int i = features.size() - 1; i >= 0; i--) {
+			FeaturePoint fp = features.get(i);
+			if (type == fp.type && fp.index > minIndex) {
+				return fp;
+			}
+		}
+		return null;
 	}
 }

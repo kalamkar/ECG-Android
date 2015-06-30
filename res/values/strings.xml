@@ -14,6 +14,7 @@
     
     <string name="bpm">bpm</string>
     <string name="peaks">peaks</string>
+    <string name="valleys">valleys</string>
     <string name="freq">freq</string>
     <string name="amp">amp</string>
     <string name="mean">mean</string>

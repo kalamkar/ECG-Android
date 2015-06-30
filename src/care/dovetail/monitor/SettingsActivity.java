@@ -1,5 +1,8 @@
 package care.dovetail.monitor;
 
+import java.util.Arrays;
+import java.util.List;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -10,13 +13,17 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Pair;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 import care.dovetail.monitor.BackgroundService.LocalBinder;
+import care.dovetail.monitor.SignalProcessor.FeaturePoint;
+import care.dovetail.monitor.SignalProcessor.FeaturePoint.Type;
 
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
@@ -41,6 +48,7 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 	LineGraphSeries<DataPoint> audioDataSeries = new LineGraphSeries<DataPoint>();
 	PointsGraphSeries<DataPoint> peakDataSeries = new PointsGraphSeries<DataPoint>();
 	PointsGraphSeries<DataPoint> valleyDataSeries = new PointsGraphSeries<DataPoint>();
+	LineGraphSeries<DataPoint> median = new LineGraphSeries<DataPoint>();
 
 	private SignalProcessor signals;
 
@@ -68,6 +76,10 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 		valleyDataSeries.setSize(10);
 		valleyDataSeries.setColor(getResources().getColor(android.R.color.holo_blue_dark));
 
+		graph.addSeries(median);
+		median.setThickness(2);
+		median.setColor(getResources().getColor(android.R.color.darker_gray));
+
 		graph.getGridLabelRenderer().setGridStyle(GridStyle.NONE);
 		graph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter() {
 			@Override
@@ -81,6 +93,13 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 		graph.getViewport().setYAxisBoundsManual(true);
 		graph.getViewport().setMaxY(256.0);
 		graph.getViewport().setMinY(0.0);
+
+		graph.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				Log.i(TAG, Arrays.toString(signals.values));
+			}
+		});
 
 		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
 		    Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_LONG).show();
@@ -120,19 +139,28 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 			}
 			int data[] = intent.getIntArrayExtra(Config.SENSOR_DATA);
 			signals.update(data);
-			final DataPoint[] dataPoints = new DataPoint[data == null ? 0 : data.length];
+			if (data == null) {
+				return;
+			}
+			final DataPoint[] medianPoints = new DataPoint[2];
+			medianPoints[0] = new DataPoint(0, signals.medianAmplitude);
+			medianPoints[1] = new DataPoint(data.length, signals.medianAmplitude);
+
+			final DataPoint[] dataPoints = new DataPoint[data.length];
 			for (int i = 0; i < dataPoints.length; i++) {
 				dataPoints[i] = new DataPoint(i, data[i]);
 			}
-			final DataPoint[] peakPoints = new DataPoint[signals.peaks.size()];
+			List<FeaturePoint> peaks = signals.getFeaturePoints(Type.PEAK);
+			final DataPoint[] peakPoints = new DataPoint[peaks.size()];
 			for (int i = 0; i < peakPoints.length; i++) {
-				Pair<Integer, Integer> peak = signals.peaks.get(i);
-				peakPoints[i] = new DataPoint(peak.first, peak.second);
+				FeaturePoint peak = peaks.get(i);
+				peakPoints[i] = new DataPoint(peak.index, peak.amplitude);
 			}
-			final DataPoint[] valleyPoints = new DataPoint[signals.valleys.size()];
+			List<FeaturePoint> valleys = signals.getFeaturePoints(Type.VALLEY);
+			final DataPoint[] valleyPoints = new DataPoint[valleys.size()];
 			for (int i = 0; i < valleyPoints.length; i++) {
-				Pair<Integer, Integer> valley = signals.valleys.get(i);
-				valleyPoints[i] = new DataPoint(valley.first, valley.second);
+				FeaturePoint valley = valleys.get(i);
+				valleyPoints[i] = new DataPoint(valley.index, valley.amplitude);
 			}
 			runOnUiThread(new Runnable() {
 				@Override
@@ -140,11 +168,18 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 					audioDataSeries.resetData(dataPoints);
 					peakDataSeries.resetData(peakPoints);
 					valleyDataSeries.resetData(valleyPoints);
-					((TextView) findViewById(R.id.bpm)).setText(Integer.toString(signals.bpm));
-					((TextView) findViewById(R.id.peaks)).setText(
-							Integer.toString(signals.peakCount));
-					((TextView) findViewById(R.id.amp)).setText(
-							Integer.toString(signals.avgPeakAmplitude));
+					median.resetData(medianPoints);
+
+					int peakCount = signals.count.get(Type.PEAK);
+					int valleyCount = signals.count.get(Type.VALLEY);
+					int bpm = peakCount > valleyCount ? signals.bpm.get(Type.PEAK)
+							: signals.bpm.get(Type.VALLEY);
+					((TextView) findViewById(R.id.bpm)).setText(Integer.toString(bpm));
+					((TextView) findViewById(R.id.peaks)).setText(Integer.toString(peakCount));
+					((TextView) findViewById(R.id.valleys)).setText(Integer.toString(valleyCount));
+					int amp = peakCount > valleyCount
+							? signals.avgAmp.get(Type.PEAK) : signals.avgAmp.get(Type.VALLEY);
+					((TextView) findViewById(R.id.amp)).setText(Integer.toString(amp));
 					((TextView) findViewById(R.id.mean)).setText(
 							Integer.toString(signals.medianAmplitude));
 				}

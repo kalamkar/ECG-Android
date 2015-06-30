@@ -67,10 +67,34 @@
         </LinearLayout>
         
         <LinearLayout
-            android:id="@+id/amplitude"
+            android:id="@+id/valleysBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/peaksBox"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/valleys"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <TextView
+                android:id="@+id/valleysText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/valleys"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:id="@+id/amplitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/valleysBox"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:orientation="vertical" >
