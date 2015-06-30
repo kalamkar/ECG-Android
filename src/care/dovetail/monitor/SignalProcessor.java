@@ -176,6 +176,8 @@ public class SignalProcessor {
 
 	private void updateStats() {
 		Map<FeaturePoint.Type, Integer> prevIndex = new HashMap<FeaturePoint.Type, Integer>();
+		Map<FeaturePoint.Type, Integer> firstIndex = new HashMap<FeaturePoint.Type, Integer>();
+		Map<FeaturePoint.Type, Integer> lastIndex = new HashMap<FeaturePoint.Type, Integer>();
 		for (FeaturePoint fp : features) {
 			count.put(fp.type, count.get(fp.type) + 1);
 			sumAmp.put(fp.type, sumAmp.get(fp.type) + Math.abs(fp.amplitude - medianAmplitude));
@@ -183,11 +185,24 @@ public class SignalProcessor {
 				sumDistance.put(fp.type, sumDistance.get(fp.type) + fp.index - prevIndex.get(fp.type));
 			}
 			prevIndex.put(fp.type, fp.index);
+			if (!firstIndex.containsKey(fp.type)) {
+				firstIndex.put(fp.type, fp.index);
+			}
+			lastIndex.put(fp.type, fp.index);
 		}
+
 		for (Type type : FeaturePoint.Type.values()) {
-			int duration = sumDistance.get(type) * Config.SAMPLE_INTERVAL_MS;
+			int totalDistance = 0;
+			if (lastIndex.containsKey(type) && firstIndex.containsKey(type)) {
+				totalDistance = lastIndex.get(type) - firstIndex.get(type);
+			}
+
+			int duration = totalDistance * Config.SAMPLE_INTERVAL_MS;
+			int avgDistance = count.get(type) > 1 ? sumDistance.get(type) / (count.get(type) - 1) : 0;
+			int avgCount = avgDistance == 0 ? 0 : totalDistance / avgDistance;
+
 			totalDuration.put(type, duration);
-			bpm.put(type, duration == 0 ? 0 : 60 * 1000 * count.get(type) / duration);
+			bpm.put(type, duration == 0 ? 0 : 60 * 1000 * avgCount / duration);
 			avgAmp.put(type, count.get(type) == 0 ? 0 :
 				(sumAmp.get(type) / count.get(type)) - medianAmplitude);
 		}
