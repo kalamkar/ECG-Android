@@ -172,8 +172,7 @@ public class SettingsActivity extends Activity implements OnSeekBarChangeListene
 
 					int peakCount = signals.count.get(Type.PEAK);
 					int valleyCount = signals.count.get(Type.VALLEY);
-					int bpm = peakCount > valleyCount ? signals.bpm.get(Type.PEAK)
-							: signals.bpm.get(Type.VALLEY);
+					int bpm = signals.bpm.get(Type.PEAK);
 					((TextView) findViewById(R.id.bpm)).setText(Integer.toString(bpm));
 					((TextView) findViewById(R.id.peaks)).setText(Integer.toString(peakCount));
 					((TextView) findViewById(R.id.valleys)).setText(Integer.toString(valleyCount));
