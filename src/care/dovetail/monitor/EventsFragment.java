@@ -105,10 +105,6 @@ public class EventsFragment extends Fragment {
 				title = R.string.starting_service;
 			} else if (Event.Type.KICK_RECORDED.name().equalsIgnoreCase(event.type)) {
 				title = R.string.recorded_kick;
-			} else if (Event.Type.KICK_DETECTED.name().equalsIgnoreCase(event.type)) {
-				title = R.string.detected_kick;
-			} else if (Event.Type.HEART_RATE.name().equalsIgnoreCase(event.type)) {
-				title = R.string.heart_rate;
 			} else if (Event.Type.SENSOR_CONNECTED.name().equalsIgnoreCase(event.type)) {
 				title = R.string.baby_monitor_is_working;
 			} else if (Event.Type.SENSOR_DISCONNECTED.name().equalsIgnoreCase(event.type)) {
