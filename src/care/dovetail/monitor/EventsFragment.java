@@ -101,18 +101,18 @@ public class EventsFragment extends Fragment {
 			Event event = getItem(position);
 			view.setTag(event);
 			int title = R.string.unknown;
-			if (Event.Type.SERVICE_STARTED.name().equalsIgnoreCase(event.type)) {
+			if (Event.Type.SERVICE_STARTED.name().equalsIgnoreCase(event.tags[0])) {
 				title = R.string.starting_service;
-			} else if (Event.Type.KICK_RECORDED.name().equalsIgnoreCase(event.type)) {
+			} else if (Event.Type.KICK_RECORDED.name().equalsIgnoreCase(event.tags[0])) {
 				title = R.string.recorded_kick;
-			} else if (Event.Type.SENSOR_CONNECTED.name().equalsIgnoreCase(event.type)) {
+			} else if (Event.Type.SENSOR_CONNECTED.name().equalsIgnoreCase(event.tags[0])) {
 				title = R.string.baby_monitor_is_working;
-			} else if (Event.Type.SENSOR_DISCONNECTED.name().equalsIgnoreCase(event.type)) {
+			} else if (Event.Type.SENSOR_DISCONNECTED.name().equalsIgnoreCase(event.tags[0])) {
 				title = R.string.baby_monitor_is_not_working;
-			} else if (event.type != null) {
-				((TextView) view.findViewById(R.id.title)).setText(event.type);
+			} else if (event.tags[0] != null) {
+				((TextView) view.findViewById(R.id.title)).setText(event.tags[0]);
 			} else {
-				Log.e(TAG, String.format("Unknown event %s", event.type));
+				Log.e(TAG, String.format("Unknown event %s", event.tags[0]));
 			}
 			if (title != R.string.unknown) {
 				((TextView) view.findViewById(R.id.title)).setText(title);

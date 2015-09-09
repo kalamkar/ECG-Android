@@ -31,7 +31,7 @@ public class SyncTask extends TimerTask {
 	public void run() {
 		for (Event event : app.events.getLatest(app.getLastSyncTime())) {
 			new AddEvent(event).execute();
-			Log.i(TAG, String.format("Adding event %s %d", event.type, event.time));
+			Log.i(TAG, String.format("Adding event %s %d", event.tags[0], event.time));
 		}
 	}
 
@@ -48,7 +48,7 @@ public class SyncTask extends TimerTask {
 				throws UnsupportedEncodingException {
 			List<NameValuePair> queryParams = new ArrayList<NameValuePair>();
 			queryParams.add(new BasicNameValuePair("device_id", app.getDeviceId()));
-			queryParams.add(new BasicNameValuePair("type", event.type));
+			queryParams.add(new BasicNameValuePair("tags", event.tags[0]));
 			queryParams.add(new BasicNameValuePair("time", Long.toString(event.time)));
 			for (Pair<String, String> param : params) {
 				queryParams.add(new BasicNameValuePair(param.first, param.second));
@@ -65,7 +65,7 @@ public class SyncTask extends TimerTask {
 					&& app.getLastSyncTime() < event.time) {
 				app.setLastSyncTime(event.time);
 			} else if (result != null && !"OK".equalsIgnoreCase(result.code)) {
-				Log.e(TAG, String.format("Failed to add %s %s", event.type, result.message));
+				Log.e(TAG, String.format("Failed to add %s %s", event.tags[0], result.message));
 			}
 		}
 	}

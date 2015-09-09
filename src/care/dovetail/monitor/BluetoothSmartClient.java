@@ -156,10 +156,10 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 		}
 		boolean success = true;
 		success = success && gatt.setCharacteristicNotification(peakValue, false);
-//		for (BluetoothGattDescriptor descriptor : peakValue.getDescriptors()) {
-//			descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
-//			success = success && gatt.writeDescriptor(descriptor);
-//		}
+		for (BluetoothGattDescriptor descriptor : peakValue.getDescriptors()) {
+			descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+			success = success && gatt.writeDescriptor(descriptor);
+		}
 		return success;
 	}
 }
