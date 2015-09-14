@@ -1,10 +1,7 @@
 package care.dovetail.monitor;
 
-import java.util.Arrays;
-
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -20,7 +17,6 @@ import android.util.Log;
 public class BluetoothSmartClient extends BluetoothGattCallback {
 	private static final String TAG = "BluetoothSmartClient";
 
-	private final Context context;
 	private final ConnectionListener listener;
 
 	private final BluetoothAdapter adapter;
@@ -38,23 +34,18 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
     	public void onNewValues(int values[]);
     }
 
-	public BluetoothSmartClient(Context context, ConnectionListener listener) {
-		this.context = context;
+	public BluetoothSmartClient(Context context, ConnectionListener listener, String address) {
 		this.listener = listener;
 		BluetoothManager bluetoothManager =
 				(BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
 		adapter = bluetoothManager.getAdapter();
-	}
 
-	public void connectToDevice(String address) {
 		if (address == null || address.isEmpty()) {
-			Log.e(TAG, "No BluetoothLE device selected.");
+			Log.e(TAG, "No BluetoothLE device given to connect.");
 			return;
 		}
 		if (adapter != null && adapter.isEnabled()) {
-			Log.i(TAG, String.format("Connecting to BluetoothLE device %s.", address));
-			BluetoothDevice device = adapter.getRemoteDevice(address);
-			device.connectGatt(context, true, this);
+			adapter.getRemoteDevice(address).connectGatt(context, false /* auto connect */, this);
 		}
 	}
 
@@ -63,20 +54,20 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
         this.gatt = gatt;
         this.state = newState;
         if (newState == BluetoothProfile.STATE_CONNECTED) {
-        	Log.i(TAG, String.format("Connected to GATT server %s", gatt.getDevice().getAddress()));
         	gatt.discoverServices();
         	listener.onConnect(gatt.getDevice().getAddress());
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-        	Log.e(TAG, String.format("Disconnected from GATT server %s.",
-        			gatt.getDevice().getAddress()));
         	listener.onDisconnect(gatt.getDevice().getAddress());
+        } else {
+        	Log.e(TAG, String.format("GATT server %s changed to unknown new state %d and status %d",
+        			gatt.getDevice().getAddress(), newState, status));
         }
     }
 
     @Override
     public void onServicesDiscovered(BluetoothGatt gatt, int status) {
         if (status != BluetoothGatt.GATT_SUCCESS) {
-        	Log.e(TAG, "onServicesDiscovered received: " + status);
+        	Log.e(TAG, "onServicesDiscovered received error code: " + status);
         	return;
         }
     	for (BluetoothGattService service : gatt.getServices()) {
@@ -91,7 +82,7 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
     		}
     	}
     	if (peakValue != null && sensorData != null) {
-    		Log.i(TAG, String.format("Found PeakValue UUID %s and Sensor Data UUID %s",
+    		Log.d(TAG, String.format("Found PeakValue UUID %s and Sensor Data UUID %s",
     				Long.toHexString(peakValue.getUuid().getMostSignificantBits()),
     				Long.toHexString(sensorData.getUuid().getMostSignificantBits())));
     		listener.onServiceDiscovered(true);
@@ -109,7 +100,7 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 		for (int i = 0; i < values.length; i++) {
 			intValues[i] = values[i] & 0xFF;
 		}
-//		Log.i(TAG, String.format("onCharacteristicRead new data: %s", Arrays.toString(intValues)));
+//		Log.v(TAG, String.format("onCharacteristicRead new data: %s", Arrays.toString(intValues)));
 		listener.onNewValues(intValues);
 		super.onCharacteristicRead(gatt, characteristic, status);
 	}
@@ -117,8 +108,8 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	@Override
 	public void onCharacteristicChanged(BluetoothGatt gatt,
 			BluetoothGattCharacteristic characteristic) {
-        Log.v(TAG, String.format("onCharacteristicChanged new data: %s",
-        		Arrays.toString(characteristic.getValue())));
+//        Log.v(TAG, String.format("onCharacteristicChanged new data: %s",
+//        		Arrays.toString(characteristic.getValue())));
         gatt.readCharacteristic(sensorData);
 		super.onCharacteristicChanged(gatt, characteristic);
 	}
