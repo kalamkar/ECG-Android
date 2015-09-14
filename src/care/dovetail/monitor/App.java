@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 import java.util.UUID;
 
 import org.apache.http.NameValuePair;
@@ -45,8 +44,8 @@ public class App extends Application {
 		super.onCreate();
 		startService(new Intent(this, BackgroundService.class));
 
-		new Timer().scheduleAtFixedRate(syncTask, Config.EVENT_SYNC_INTERVAL_MILLIS,
-				Config.EVENT_SYNC_INTERVAL_MILLIS);
+//		new Timer().scheduleAtFixedRate(syncTask, Config.EVENT_SYNC_INTERVAL_MILLIS,
+//				Config.EVENT_SYNC_INTERVAL_MILLIS);
 
 		if (getDeviceId() == null) {
 			createDeviceId();

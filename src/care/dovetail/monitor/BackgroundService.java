@@ -144,7 +144,7 @@ public class BackgroundService extends Service implements OnSharedPreferenceChan
 	private void broadcastEvent(String type, long timeMillis) {
 		sendBroadcast(new Intent(Config.SERVICE_EVENT).putExtra(Config.EVENT_TYPE, type)
 				.putExtra(Config.EVENT_TIME, timeMillis));
-		app.events.add(new Event(type, timeMillis));
+//		app.events.add(new Event(type, timeMillis));
 	}
 
 	private void showNotification(int title, int text, String eventType, int icon) {

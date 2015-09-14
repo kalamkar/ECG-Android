@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import care.dovetail.common.model.Event;
 
 public class MainFragment extends Fragment {
 
@@ -40,8 +39,8 @@ public class MainFragment extends Fragment {
 		view.findViewById(R.id.kick).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				app.events.add(
-						new Event(Event.Type.KICK_RECORDED.name(), System.currentTimeMillis()));
+//				app.events.add(
+//						new Event(Event.Type.KICK_RECORDED.name(), System.currentTimeMillis()));
 				((MainActivity) getActivity()).reloadEvents();
 			}
 		});
