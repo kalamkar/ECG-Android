@@ -7,13 +7,11 @@
     <com.jjoe64.graphview.GraphView
         android:id="@+id/graph"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-    </com.jjoe64.graphview.GraphView>
+        android:layout_height="match_parent" />
     
     <com.jjoe64.graphview.GraphView
         android:id="@+id/longGraph"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-    </com.jjoe64.graphview.GraphView>
+        android:layout_height="match_parent" />
 
 </FrameLayout>

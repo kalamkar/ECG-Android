@@ -11,6 +11,7 @@ public class Config {
 	public static final int SAMPLE_INTERVAL_MS = 10;
 
 	public static final int NUM_SAMPLES_LONG_TERM_GRAPH = 30000;
+	public static final int NUM_SAMPLES_AVERAGE = 5;
 
 	public static final int UI_UPDATE_INTERVAL_MILLIS = 10000;
 

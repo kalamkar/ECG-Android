@@ -1,9 +1,8 @@
 package care.dovetail.monitor;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -21,25 +20,13 @@ import com.jjoe64.graphview.series.PointsGraphSeries;
 public class ChartFragment extends Fragment {
 	private static final String TAG = "ChartFragment";
 
-	public static final String WINDOW_SIZE = "WINDOW_SIZE";
-	public static final String MIN_SLOPE = "MIN_SLOPE";
-
-	private App app;
-
-	private LineGraphSeries<DataPoint> audioDataSeries = new LineGraphSeries<DataPoint>();
+	private LineGraphSeries<DataPoint> dataSeries = new LineGraphSeries<DataPoint>();
 	private PointsGraphSeries<DataPoint> peakDataSeries = new PointsGraphSeries<DataPoint>();
 	private PointsGraphSeries<DataPoint> valleyDataSeries = new PointsGraphSeries<DataPoint>();
 	private LineGraphSeries<DataPoint> median = new LineGraphSeries<DataPoint>();
 	private LineGraphSeries<DataPoint> longSeries = new LineGraphSeries<DataPoint>();
 
-	private LimitedQueue<DataPoint> longData =
-			new LimitedQueue<DataPoint>(Config.NUM_SAMPLES_LONG_TERM_GRAPH);
-
-	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		app = (App) activity.getApplication();
-	}
+	private final List<Integer> cache = new ArrayList<Integer>(Config.NUM_SAMPLES_AVERAGE);
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,7 +39,7 @@ public class ChartFragment extends Fragment {
 		super.onViewCreated(view, savedInstanceState);
 
 		GraphView graph = ((GraphView) view.findViewById(R.id.graph));
-		graph.addSeries(audioDataSeries);
+		graph.addSeries(dataSeries);
 
 		graph.addSeries(peakDataSeries);
 		peakDataSeries.setSize(10);
@@ -93,15 +80,20 @@ public class ChartFragment extends Fragment {
 
 	public void updateGraph(int data[], List<FeaturePoint> peaks, List<FeaturePoint> valleys,
 			int medianAmplitude) {
-		DataPoint[] medianPoints = new DataPoint[2];
-		medianPoints[0] = new DataPoint(0, medianAmplitude);
-		medianPoints[1] = new DataPoint(data.length, medianAmplitude);
+		median.resetData(new DataPoint[] {
+				new DataPoint(0, medianAmplitude), new DataPoint(data.length, medianAmplitude) });
 
 		double highestX = longSeries.getHighestValueX();
 		DataPoint[] dataPoints = new DataPoint[data.length];
 		for (int i = 0; i < dataPoints.length; i++) {
 			dataPoints[i] = new DataPoint(i, data[i]);
-			longData.add(new DataPoint(highestX + i, data[i]));
+			cache.add(data[i]);
+			if (cache.size() == Config.NUM_SAMPLES_AVERAGE) {
+				longSeries.appendData(new DataPoint(highestX + i / Config.NUM_SAMPLES_AVERAGE,
+						average(cache.toArray(new Integer[0]))), true,
+						Config.NUM_SAMPLES_LONG_TERM_GRAPH);
+				cache.clear();
+			}
 		}
 
 		DataPoint[] peakPoints = new DataPoint[peaks.size()];
@@ -116,25 +108,16 @@ public class ChartFragment extends Fragment {
 			valleyPoints[i] = new DataPoint(valley.index, valley.amplitude);
 		}
 
-		audioDataSeries.resetData(dataPoints);
+		dataSeries.resetData(dataPoints);
 		peakDataSeries.resetData(peakPoints);
 		valleyDataSeries.resetData(valleyPoints);
-		median.resetData(medianPoints);
-		longSeries.resetData(longData.toArray(new DataPoint[0]));
 	}
 
-	private static class LimitedQueue<E> extends LinkedList<E> {
-	    private int limit;
-
-	    public LimitedQueue(int limit) {
-	        this.limit = limit;
-	    }
-
-	    @Override
-	    public boolean add(E o) {
-	        super.add(o);
-	        while (size() > limit) { super.remove(); }
-	        return true;
-	    }
+	private static int average(Integer values[]) {
+		int sum = 0;
+		for (int value : values) {
+			sum += value;
+		}
+		return sum / values.length;
 	}
 }
