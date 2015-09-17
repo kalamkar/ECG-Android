@@ -27,6 +27,8 @@ import care.dovetail.monitor.SignalProcessor.FeaturePoint.Type;
 public class MainActivity extends Activity implements OnSeekBarChangeListener, ConnectionListener {
 	private static final String TAG = "MainActivity";
 
+	private static final String BTLE_ADDRESS = "BTLE_ADDRESS";
+
 	@SuppressWarnings("unused")
 	private App app;
 
@@ -44,7 +46,7 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 
 		app = (App) getApplication();
 
-		final BluetoothManager bluetoothManager =
+		BluetoothManager bluetoothManager =
 				(BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 		BluetoothAdapter bluetooth = bluetoothManager.getAdapter();
 		scanner = bluetooth.getBluetoothLeScanner();
@@ -71,8 +73,23 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 	}
 
 	@Override
-    protected void onResume() {
-        super.onResume();
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		String address = savedInstanceState.getString(BTLE_ADDRESS, null);
+		if (address != null) {
+			patchClient = new BluetoothSmartClient(this, this, address);
+		}
+		super.onRestoreInstanceState(savedInstanceState);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putString(BTLE_ADDRESS, patchClient != null ? patchClient.getDevice() : null);
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+    protected void onStart() {
+        super.onStart();
         startScan();
     }
 
@@ -143,7 +160,9 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 
 	private void stopScan() {
 		Log.i(TAG, "Stopping scan for BTLE patch.");
-		scanner.stopScan(callback);
+		if (scanner != null) {
+			scanner.stopScan(callback);
+		}
 		findViewById(R.id.progress).setVisibility(View.INVISIBLE);
 	}
 
@@ -156,12 +175,6 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 	public void onDisconnect(String address) {
 		Log.i(TAG, String.format("Disconnected from %s", address));
 		patchClient = null;
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				startScan();
-			}
-		});
 	}
 
 	@Override
@@ -189,7 +202,9 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 
 				ChartFragment fragment =
 						(ChartFragment) getFragmentManager().findFragmentById(R.id.chart);
-				fragment.updateGraph(data, peaks, valleys, signals.medianAmplitude);
+				if (fragment != null) {
+					fragment.updateGraph(data, peaks, valleys, signals.medianAmplitude);
+				}
 
 				int peakCount = signals.count.get(Type.PEAK);
 				int valleyCount = signals.count.get(Type.VALLEY);

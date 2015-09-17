@@ -119,13 +119,14 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	}
 
 	public String getDevice() {
-		return gatt == null ? "" : gatt.getDevice().getAddress();
+		return gatt == null ? null : gatt.getDevice().getAddress();
 	}
 
 	public void disconnect() {
 		if (gatt != null && isConnected()) {
 			gatt.disconnect();
 		}
+		gatt = null;
 	}
 
 	public boolean enableNotifications() {
