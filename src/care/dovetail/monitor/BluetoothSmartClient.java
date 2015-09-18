@@ -72,11 +72,10 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
         }
     	for (BluetoothGattService service : gatt.getServices()) {
     		for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
-    			if ((characteristic.getProperties()
-    					& BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0) {
+    			long uuid = characteristic.getUuid().getMostSignificantBits() >> 32;
+    			if (uuid == Config.PEAK_UUID) {
     				peakValue = characteristic;
-    			} else if (Long.toHexString(characteristic.getUuid().getMostSignificantBits())
-    						.startsWith(Config.BT_SENSOR_DATA_CHAR_PREFIX)) {
+    			} else if (uuid == Config.DATA_UUID) {
     				sensorData = characteristic;
     			}
     		}
