@@ -4,8 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 public class Config {
-	public static final long DATA_UUID = 0x1902;
-	public static final long PEAK_UUID = 0x1903;
+	public static final long DATA_UUID = 0x404846A1;
+	public static final long PEAK_UUID = 0x404846A2;
 	public static final String BT_DEVICE_NAME = "Pregnansi";
 
 	public static final int SAMPLE_RATE = 200;
