@@ -11,7 +11,9 @@
     <string name="events">Events</string>
     
     <string name="bluetooth">Bluetooth</string>
+    <string name="connected">Connected</string>
     
+    <string name="seconds">sec</string>
     <string name="bpm">bpm</string>
     <string name="peaks">peaks</string>
     <string name="valleys">valleys</string>

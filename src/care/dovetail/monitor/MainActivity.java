@@ -1,6 +1,8 @@
 package care.dovetail.monitor;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -38,6 +40,9 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 	private SignalProcessor signals;
 
 	private long lastChangeTime = 0;
+	private long lastUpdateTime = System.currentTimeMillis();
+
+	private Timer staleTimer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +104,9 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
     	if (patchClient != null) {
     		patchClient.disableNotifications();
     		patchClient.disconnect();
+    	}
+    	if (staleTimer != null) {
+    		staleTimer.cancel();
     	}
         super.onStop();
     }
@@ -168,11 +176,41 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 
 	@Override
 	public void onConnect(String address) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				((CheckBox) findViewById(R.id.connected)).setChecked(true);
+			}
+		});
 		Log.i(TAG, String.format("Connected to %s", address));
+		staleTimer = new Timer();
+		staleTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						long seconds = (System.currentTimeMillis() - lastUpdateTime) / 1000;
+						TextView secondsView = (TextView) findViewById(R.id.seconds);
+						if (secondsView != null) {
+							secondsView.setText(Long.toString(seconds));
+						}
+					}
+				});
+			}
+		}, 0, 1000);
 	}
 
 	@Override
 	public void onDisconnect(String address) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				((CheckBox) findViewById(R.id.connected)).setChecked(false);
+			}
+		});
+		staleTimer.cancel();
+		staleTimer = null;
 		Log.i(TAG, String.format("Disconnected from %s", address));
 		patchClient = null;
 	}
@@ -189,6 +227,7 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 
 	@Override
 	public void onNewValues(final int data[]) {
+		lastUpdateTime = System.currentTimeMillis();
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
