@@ -226,24 +226,28 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 	}
 
 	@Override
-	public void onNewValues(final int data[]) {
+	public void onNewValues(final char axis, final int data[]) {
 		lastUpdateTime = System.currentTimeMillis();
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				signals.update(data);
-				if (data == null) {
+				ChartFragment fragment =
+						(ChartFragment) getFragmentManager().findFragmentById(R.id.chart);
+				if (fragment == null || data == null) {
 					return;
 				}
 
+				if (axis == 'X' || axis == 'Y') {
+					fragment.updateGraph(axis, data);
+					return;
+				}
+
+				signals.update(data);
 				List<FeaturePoint> peaks = signals.getFeaturePoints(Type.PEAK);
 				List<FeaturePoint> valleys = signals.getFeaturePoints(Type.VALLEY);
 
-				ChartFragment fragment =
-						(ChartFragment) getFragmentManager().findFragmentById(R.id.chart);
-				if (fragment != null) {
-					fragment.updateGraph(data, peaks, valleys, signals.medianAmplitude);
-				}
+				fragment.updateGraph(axis, data);
+				fragment.updateMarkers(peaks, valleys, signals.medianAmplitude);
 
 				int peakCount = signals.count.get(Type.PEAK);
 				int valleyCount = signals.count.get(Type.VALLEY);

@@ -20,7 +20,9 @@ import com.jjoe64.graphview.series.PointsGraphSeries;
 public class ChartFragment extends Fragment {
 	private static final String TAG = "ChartFragment";
 
-	private LineGraphSeries<DataPoint> dataSeries = new LineGraphSeries<DataPoint>();
+	private LineGraphSeries<DataPoint> dataXSeries = new LineGraphSeries<DataPoint>();
+	private LineGraphSeries<DataPoint> dataYSeries = new LineGraphSeries<DataPoint>();
+	private LineGraphSeries<DataPoint> dataZSeries = new LineGraphSeries<DataPoint>();
 	private PointsGraphSeries<DataPoint> peakDataSeries = new PointsGraphSeries<DataPoint>();
 	private PointsGraphSeries<DataPoint> valleyDataSeries = new PointsGraphSeries<DataPoint>();
 	private LineGraphSeries<DataPoint> median = new LineGraphSeries<DataPoint>();
@@ -39,7 +41,13 @@ public class ChartFragment extends Fragment {
 		super.onViewCreated(view, savedInstanceState);
 
 		GraphView graph = ((GraphView) view.findViewById(R.id.graph));
-		graph.addSeries(dataSeries);
+		graph.addSeries(dataXSeries);
+		graph.addSeries(dataYSeries);
+		graph.addSeries(dataZSeries);
+
+		dataXSeries.setColor(0xFFFF0000);
+		dataYSeries.setColor(0xFF00FF00);
+		dataZSeries.setColor(0xFF0000FF);
 
 		graph.addSeries(peakDataSeries);
 		peakDataSeries.setSize(10);
@@ -58,7 +66,7 @@ public class ChartFragment extends Fragment {
 		longSeries.setThickness(2);
 		longSeries.setColor(getResources().getColor(android.R.color.holo_green_light));
 
-		initializeGraph(graph, 512);
+		initializeGraph(graph, Config.DATA_LENGTH);
 		initializeGraph(longGraph, Config.NUM_SAMPLES_LONG_TERM_GRAPH);
 	}
 
@@ -78,23 +86,34 @@ public class ChartFragment extends Fragment {
 		graph.getViewport().setMinY(0.0);
 	}
 
-	public void updateGraph(int data[], List<FeaturePoint> peaks, List<FeaturePoint> valleys,
-			int medianAmplitude) {
-		median.resetData(new DataPoint[] {
-				new DataPoint(0, medianAmplitude), new DataPoint(data.length, medianAmplitude) });
-
+	public void updateGraph(char axis, int data[]) {
 		double highestX = longSeries.getHighestValueX();
 		DataPoint[] dataPoints = new DataPoint[data.length];
 		for (int i = 0; i < dataPoints.length; i++) {
 			dataPoints[i] = new DataPoint(i, data[i]);
-			cache.add(data[i]);
-			if (cache.size() == Config.NUM_SAMPLES_AVERAGE) {
-				longSeries.appendData(new DataPoint(highestX + i / Config.NUM_SAMPLES_AVERAGE,
-						average(cache.toArray(new Integer[0]))), true,
-						Config.NUM_SAMPLES_LONG_TERM_GRAPH);
-				cache.clear();
+			if (axis == 'Z') {
+				cache.add(data[i]);
+				if (cache.size() == Config.NUM_SAMPLES_AVERAGE) {
+					longSeries.appendData(new DataPoint(highestX + i / Config.NUM_SAMPLES_AVERAGE,
+							average(cache.toArray(new Integer[0]))), true,
+							Config.NUM_SAMPLES_LONG_TERM_GRAPH);
+					cache.clear();
+				}
 			}
 		}
+		if (axis == 'X') {
+			dataXSeries.resetData(dataPoints);
+		} else if (axis == 'Y') {
+			dataYSeries.resetData(dataPoints);
+		} else if (axis == 'Z') {
+			dataZSeries.resetData(dataPoints);
+		}
+	}
+
+	public void updateMarkers(List<FeaturePoint> peaks, List<FeaturePoint> valleys,
+			int medianAmplitude) {
+		median.resetData(new DataPoint[] { new DataPoint(0, medianAmplitude),
+				new DataPoint(Config.DATA_LENGTH, medianAmplitude) });
 
 		DataPoint[] peakPoints = new DataPoint[peaks.size()];
 		for (int i = 0; i < peakPoints.length; i++) {
@@ -108,7 +127,6 @@ public class ChartFragment extends Fragment {
 			valleyPoints[i] = new DataPoint(valley.index, valley.amplitude);
 		}
 
-		dataSeries.resetData(dataPoints);
 		peakDataSeries.resetData(peakPoints);
 		valleyDataSeries.resetData(valleyPoints);
 	}

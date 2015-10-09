@@ -22,8 +22,10 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	private final BluetoothAdapter adapter;
 
 	private BluetoothGatt gatt;
-	private BluetoothGattCharacteristic sensorData;
 	private BluetoothGattCharacteristic peakValue;
+	private BluetoothGattCharacteristic sensorDataX;
+	private BluetoothGattCharacteristic sensorDataY;
+	private BluetoothGattCharacteristic sensorDataZ;
 
 	private int state = BluetoothProfile.STATE_DISCONNECTED;
 
@@ -31,7 +33,7 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
     	public void onConnect(String address);
     	public void onDisconnect(String address);
     	public void onServiceDiscovered(boolean success);
-    	public void onNewValues(int values[]);
+    	public void onNewValues(char axis, int values[]);
     }
 
 	public BluetoothSmartClient(Context context, ConnectionListener listener, String address) {
@@ -75,15 +77,19 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
     			long uuid = characteristic.getUuid().getMostSignificantBits() >> 32;
     			if (uuid == Config.PEAK_UUID) {
     				peakValue = characteristic;
-    			} else if (uuid == Config.DATA_UUID) {
-    				sensorData = characteristic;
+    			} else if (uuid == Config.X_DATA_UUID) {
+    				sensorDataX = characteristic;
+    			} else if (uuid == Config.Y_DATA_UUID) {
+    				sensorDataY = characteristic;
+    			} else if (uuid == Config.Z_DATA_UUID) {
+    				sensorDataZ = characteristic;
     			}
     		}
     	}
-    	if (peakValue != null && sensorData != null) {
+    	if (peakValue != null && sensorDataZ != null) {
     		Log.d(TAG, String.format("Found PeakValue UUID %s and Sensor Data UUID %s",
     				Long.toHexString(peakValue.getUuid().getMostSignificantBits()),
-    				Long.toHexString(sensorData.getUuid().getMostSignificantBits())));
+    				Long.toHexString(sensorDataZ.getUuid().getMostSignificantBits())));
     		listener.onServiceDiscovered(true);
     	} else {
     		Log.e(TAG, "Could not find PeakValue and/or Sensor Data.");
@@ -92,25 +98,29 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
     }
 
 	@Override
-	public void onCharacteristicRead(BluetoothGatt gatt,
-			BluetoothGattCharacteristic characteristic, int status) {
+	public void onCharacteristicChanged(BluetoothGatt gatt,
+			BluetoothGattCharacteristic characteristic) {
+        gatt.readCharacteristic(sensorDataX);
+		super.onCharacteristicChanged(gatt, characteristic);
+	}
+
+	@Override
+	public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic,
+			int status) {
 		byte[] values = characteristic.getValue();
 		int intValues[] = new int[values.length];
 		for (int i = 0; i < values.length; i++) {
 			intValues[i] = values[i] & 0xFF;
 		}
-//		Log.v(TAG, String.format("onCharacteristicRead new data: %s", Arrays.toString(intValues)));
-		listener.onNewValues(intValues);
-		super.onCharacteristicRead(gatt, characteristic, status);
-	}
 
-	@Override
-	public void onCharacteristicChanged(BluetoothGatt gatt,
-			BluetoothGattCharacteristic characteristic) {
-//        Log.v(TAG, String.format("onCharacteristicChanged new data: %s",
-//        		Arrays.toString(characteristic.getValue())));
-        gatt.readCharacteristic(sensorData);
-		super.onCharacteristicChanged(gatt, characteristic);
+		char axis = getAxisForCharacteristic(characteristic);
+		if (axis == 'X') {
+			gatt.readCharacteristic(sensorDataY);
+		} else if (axis == 'Y') {
+			gatt.readCharacteristic(sensorDataZ);
+		}
+		listener.onNewValues(axis, intValues);
+		super.onCharacteristicRead(gatt, characteristic, status);
 	}
 
 	public boolean isConnected() {
@@ -152,5 +162,19 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 			success = success && gatt.writeDescriptor(descriptor);
 		}
 		return success;
+	}
+
+	private char getAxisForCharacteristic(BluetoothGattCharacteristic characteristic) {
+		long uuid = characteristic.getUuid().getMostSignificantBits() >> 32;
+		if (uuid == Config.PEAK_UUID) {
+			return '!';
+		} else if (uuid == Config.X_DATA_UUID) {
+			return 'X';
+		} else if (uuid == Config.Y_DATA_UUID) {
+			return 'Y';
+		} else if (uuid == Config.Z_DATA_UUID) {
+			return 'Z';
+		}
+		return '.';
 	}
 }
