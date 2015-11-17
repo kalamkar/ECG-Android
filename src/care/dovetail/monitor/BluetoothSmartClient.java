@@ -100,7 +100,7 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	@Override
 	public void onCharacteristicChanged(BluetoothGatt gatt,
 			BluetoothGattCharacteristic characteristic) {
-        gatt.readCharacteristic(sensorDataX);
+        gatt.readCharacteristic(sensorDataZ);
 		super.onCharacteristicChanged(gatt, characteristic);
 	}
 

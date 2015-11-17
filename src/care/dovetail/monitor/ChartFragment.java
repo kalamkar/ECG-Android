@@ -26,7 +26,7 @@ public class ChartFragment extends Fragment {
 	private PointsGraphSeries<DataPoint> peakDataSeries = new PointsGraphSeries<DataPoint>();
 	private PointsGraphSeries<DataPoint> valleyDataSeries = new PointsGraphSeries<DataPoint>();
 	private LineGraphSeries<DataPoint> median = new LineGraphSeries<DataPoint>();
-	private LineGraphSeries<DataPoint> longSeries = new LineGraphSeries<DataPoint>();
+	// private LineGraphSeries<DataPoint> longSeries = new LineGraphSeries<DataPoint>();
 
 	private final List<Integer> cache = new ArrayList<Integer>(Config.NUM_SAMPLES_AVERAGE);
 
@@ -48,6 +48,7 @@ public class ChartFragment extends Fragment {
 		dataXSeries.setColor(0xFFFF0000);
 		dataYSeries.setColor(0xFF00FF00);
 		dataZSeries.setColor(0xFF0000FF);
+		dataZSeries.setThickness(1);
 
 		graph.addSeries(peakDataSeries);
 		peakDataSeries.setSize(10);
@@ -61,13 +62,13 @@ public class ChartFragment extends Fragment {
 		median.setThickness(2);
 		median.setColor(getResources().getColor(android.R.color.darker_gray));
 
-		GraphView longGraph = ((GraphView) view.findViewById(R.id.longGraph));
-		longGraph.addSeries(longSeries);
-		longSeries.setThickness(2);
-		longSeries.setColor(getResources().getColor(android.R.color.holo_green_light));
+//		GraphView longGraph = ((GraphView) view.findViewById(R.id.longGraph));
+//		longGraph.addSeries(longSeries);
+//		longSeries.setThickness(2);
+//		longSeries.setColor(getResources().getColor(android.R.color.holo_green_light));
 
 		initializeGraph(graph, Config.DATA_LENGTH);
-		initializeGraph(longGraph, Config.NUM_SAMPLES_LONG_TERM_GRAPH);
+//		initializeGraph(longGraph, Config.NUM_SAMPLES_LONG_TERM_GRAPH);
 	}
 
 	private void initializeGraph(GraphView graph, double maxX) {
@@ -87,19 +88,19 @@ public class ChartFragment extends Fragment {
 	}
 
 	public void updateGraph(char axis, int data[]) {
-		double highestX = longSeries.getHighestValueX();
+//		double highestX = longSeries.getHighestValueX();
 		DataPoint[] dataPoints = new DataPoint[data.length];
 		for (int i = 0; i < dataPoints.length; i++) {
 			dataPoints[i] = new DataPoint(i, data[i]);
-			if (axis == 'Z') {
-				cache.add(data[i]);
-				if (cache.size() == Config.NUM_SAMPLES_AVERAGE) {
-					longSeries.appendData(new DataPoint(highestX + i / Config.NUM_SAMPLES_AVERAGE,
-							average(cache.toArray(new Integer[0]))), true,
-							Config.NUM_SAMPLES_LONG_TERM_GRAPH);
-					cache.clear();
-				}
-			}
+//			if (axis == 'Z') {
+//				cache.add(data[i]);
+//				if (cache.size() == Config.NUM_SAMPLES_AVERAGE) {
+//					longSeries.appendData(new DataPoint(highestX + i / Config.NUM_SAMPLES_AVERAGE,
+//							average(cache.toArray(new Integer[0]))), true,
+//							Config.NUM_SAMPLES_LONG_TERM_GRAPH);
+//					cache.clear();
+//				}
+//			}
 		}
 		if (axis == 'X') {
 			dataXSeries.resetData(dataPoints);

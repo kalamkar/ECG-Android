@@ -10,7 +10,7 @@ public class Config {
 	public static final long Z_DATA_UUID = 0x404846A4;
 	public static final String BT_DEVICE_NAME = "Pregnansi";
 
-	public static final int DATA_LENGTH = 128;
+	public static final int DATA_LENGTH = 500;
 
 	public static final int SAMPLE_RATE = 200;
 	public static final int SAMPLE_INTERVAL_MS = 10;
