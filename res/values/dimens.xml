@@ -6,7 +6,7 @@
     
     <dimen name="small_margin">5dp</dimen>
     
-    <integer name="default_threshold1">20</integer>
+    <integer name="default_threshold1">10</integer>
     <integer name="default_threshold2">25</integer>
 
 </resources>
