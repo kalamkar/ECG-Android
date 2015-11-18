@@ -181,7 +181,7 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
-                    android:max="40"
+                    android:max="@integer/max_threshold1"
                     android:progress="@integer/default_threshold1" />
 
                 <TextView
@@ -215,7 +215,7 @@
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
-                    android:max="50"
+                    android:max="@integer/max_threshold2"
                     android:progress="@integer/default_threshold2" />
 
                 <TextView

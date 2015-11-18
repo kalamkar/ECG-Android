@@ -6,7 +6,9 @@
     
     <dimen name="small_margin">5dp</dimen>
     
-    <integer name="default_threshold1">10</integer>
+    <integer name="default_threshold1">80</integer>
+    <integer name="max_threshold1">150</integer>
     <integer name="default_threshold2">25</integer>
+    <integer name="max_threshold2">50</integer>
 
 </resources>

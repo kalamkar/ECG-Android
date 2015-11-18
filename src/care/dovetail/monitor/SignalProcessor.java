@@ -16,9 +16,9 @@ public class SignalProcessor {
 	private final int halfWindow;
 	private final int minSlope;
 
-	public final List<FeaturePoint> features = new ArrayList<FeaturePoint>();
+	private final List<FeaturePoint> features = new ArrayList<FeaturePoint>();
 
-	public int values[];
+	private int values[];
 
 	public int minAmplitude;
 	public int medianAmplitude;
