@@ -20,9 +20,7 @@ import com.jjoe64.graphview.series.PointsGraphSeries;
 public class ChartFragment extends Fragment {
 	private static final String TAG = "ChartFragment";
 
-	private LineGraphSeries<DataPoint> dataXSeries = new LineGraphSeries<DataPoint>();
-	private LineGraphSeries<DataPoint> dataYSeries = new LineGraphSeries<DataPoint>();
-	private LineGraphSeries<DataPoint> dataZSeries = new LineGraphSeries<DataPoint>();
+	private LineGraphSeries<DataPoint> dataSeries = new LineGraphSeries<DataPoint>();
 	private PointsGraphSeries<DataPoint> peakDataSeries = new PointsGraphSeries<DataPoint>();
 	private PointsGraphSeries<DataPoint> valleyDataSeries = new PointsGraphSeries<DataPoint>();
 	private LineGraphSeries<DataPoint> median = new LineGraphSeries<DataPoint>();
@@ -41,14 +39,10 @@ public class ChartFragment extends Fragment {
 		super.onViewCreated(view, savedInstanceState);
 
 		GraphView graph = ((GraphView) view.findViewById(R.id.graph));
-		graph.addSeries(dataXSeries);
-		graph.addSeries(dataYSeries);
-		graph.addSeries(dataZSeries);
+		graph.addSeries(dataSeries);
 
-		dataXSeries.setColor(0xFFFF0000);
-		dataYSeries.setColor(0xFF00FF00);
-		dataZSeries.setColor(0xFF0000FF);
-		dataZSeries.setThickness(1);
+		dataSeries.setColor(0xFF0000FF);
+		dataSeries.setThickness(1);
 
 		graph.addSeries(peakDataSeries);
 		peakDataSeries.setSize(10);
@@ -87,12 +81,11 @@ public class ChartFragment extends Fragment {
 		graph.getViewport().setMinY(0.0);
 	}
 
-	public void updateGraph(char axis, int data[]) {
+	public void updateGraph(int data[]) {
 //		double highestX = longSeries.getHighestValueX();
 		DataPoint[] dataPoints = new DataPoint[data.length];
 		for (int i = 0; i < dataPoints.length; i++) {
 			dataPoints[i] = new DataPoint(i, data[i]);
-//			if (axis == 'Z') {
 //				cache.add(data[i]);
 //				if (cache.size() == Config.NUM_SAMPLES_AVERAGE) {
 //					longSeries.appendData(new DataPoint(highestX + i / Config.NUM_SAMPLES_AVERAGE,
@@ -100,15 +93,8 @@ public class ChartFragment extends Fragment {
 //							Config.NUM_SAMPLES_LONG_TERM_GRAPH);
 //					cache.clear();
 //				}
-//			}
 		}
-		if (axis == 'X') {
-			dataXSeries.resetData(dataPoints);
-		} else if (axis == 'Y') {
-			dataYSeries.resetData(dataPoints);
-		} else if (axis == 'Z') {
-			dataZSeries.resetData(dataPoints);
-		}
+		dataSeries.resetData(dataPoints);
 	}
 
 	public void updateMarkers(List<FeaturePoint> peaks, List<FeaturePoint> valleys,

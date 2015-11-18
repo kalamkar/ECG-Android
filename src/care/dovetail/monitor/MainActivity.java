@@ -233,7 +233,7 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 	}
 
 	@Override
-	public void onNewValues(final char axis, final int data[]) {
+	public void onNewValues(final int data[]) {
 		lastUpdateTime = System.currentTimeMillis();
 		runOnUiThread(new Runnable() {
 			@Override
@@ -244,20 +244,15 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 					return;
 				}
 
-				if (axis == 'X' || axis == 'Y') {
-					fragment.updateGraph(axis, data);
-					return;
-				}
-
-				for (int i = 0; i < data.length; i++) {
-					data[i] = (int) filter.step(data[i]);
-				}
+//				for (int i = 0; i < data.length; i++) {
+//					data[i] = (int) filter.step(data[i]);
+//				}
 
 				signals.update(data);
 				List<FeaturePoint> peaks = signals.getFeaturePoints(Type.PEAK);
 				List<FeaturePoint> valleys = signals.getFeaturePoints(Type.VALLEY);
 
-				fragment.updateGraph(axis, data);
+				fragment.updateGraph(data);
 				fragment.updateMarkers(peaks, valleys, signals.medianAmplitude);
 
 				int peakCount = signals.count.get(Type.PEAK);
