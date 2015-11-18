@@ -101,8 +101,7 @@ public class SignalProcessor {
 	        int right = i <= values.length - halfWindow ? i + halfWindow : values.length -1;
 	        left = right >= halfWindow ? left : windowSize - right;
 
-	        int window[] = Arrays.copyOfRange(values, left, right);
-	        if (isPeak(i) && isSpike(values[i], window, true)) {
+	        if (isPeak(i) && isSpike(i, left, right)) {
 	        	FeaturePoint prevPeak = findPreviousFeature(Type.PEAK, i - halfWindow);
 	        	if (prevPeak != null) {
 	        		Log.i(TAG, String.format("Peak within window of %d with val %d, %d val = %d",
@@ -118,7 +117,7 @@ public class SignalProcessor {
 	        	features.add(new FeaturePoint(Type.PEAK, i, values[i]));
 	        }
 
-	        if (isValley(i) && isSpike(values[i], window, false)) {
+	        if (isValley(i) && isSpike(i, left, right)) {
 	        	FeaturePoint prevValley = findPreviousFeature(Type.VALLEY, i - halfWindow);
 	        	if (prevValley != null) {
 	                Log.i(TAG, String.format("Valley within window of %d with val %d, %d val = %d",
@@ -151,13 +150,14 @@ public class SignalProcessor {
 		return false;
 	}
 
-	private boolean isSpike(int value, int[] window, boolean isPeak) {
+	private boolean isSpike(int index, int windowStart, int windowEnd) {
 		int sum = 0;
-		for (int num : window) {
-			sum += num;
+		int value = values[index];
+		for (int i = windowStart; i < windowEnd; i++) {
+			sum += values[i];
 		}
-		int average = (sum - value) / (window.length -1);
-		return isPeak ? value - average > minSlope : average - value > minSlope;
+		int average = (sum - value) / (windowEnd - windowStart -1);
+		return Math.abs(value - average) > minSlope;
 	}
 
 	private void resetStats() {
