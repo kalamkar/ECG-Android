@@ -22,6 +22,10 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
+import biz.source_code.dsp.filter.FilterCharacteristicsType;
+import biz.source_code.dsp.filter.FilterPassType;
+import biz.source_code.dsp.filter.IirFilter;
+import biz.source_code.dsp.filter.IirFilterDesignFisher;
 import care.dovetail.monitor.BluetoothSmartClient.ConnectionListener;
 import care.dovetail.monitor.SignalProcessor.FeaturePoint;
 import care.dovetail.monitor.SignalProcessor.FeaturePoint.Type;
@@ -37,6 +41,7 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 	private BluetoothLeScanner scanner;
 	private BluetoothSmartClient patchClient;
 
+	IirFilter filter;
 	private SignalProcessor signals;
 
 	private long lastChangeTime = 0;
@@ -67,6 +72,8 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 		threshold1.setOnSeekBarChangeListener(this);
 		threshold2.setOnSeekBarChangeListener(this);
 
+		filter = new IirFilter(IirFilterDesignFisher.design(
+				FilterPassType.lowpass, FilterCharacteristicsType.bessel, 4, 0, 0.1, 0));
 		signals = new SignalProcessor(threshold1.getProgress(), threshold2.getProgress());
 
 		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -240,6 +247,10 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 				if (axis == 'X' || axis == 'Y') {
 					fragment.updateGraph(axis, data);
 					return;
+				}
+
+				for (int i = 0; i < data.length; i++) {
+					data[i] = (int) filter.step(data[i]);
 				}
 
 				signals.update(data);
