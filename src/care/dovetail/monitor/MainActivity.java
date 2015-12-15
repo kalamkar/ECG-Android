@@ -288,17 +288,8 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 				fragment.updateGraph(data);
 				fragment.updateMarkers(peaks, valleys, signals.medianAmplitude);
 
-				int peakCount = signals.count.get(Type.PEAK);
-				int valleyCount = signals.count.get(Type.VALLEY);
 				int bpm = signals.bpm.get(Type.PEAK);
 				((TextView) findViewById(R.id.bpm)).setText(Integer.toString(bpm));
-				((TextView) findViewById(R.id.peaks)).setText(Integer.toString(peakCount));
-				((TextView) findViewById(R.id.valleys)).setText(Integer.toString(valleyCount));
-				int amp = peakCount > valleyCount
-						? signals.avgAmp.get(Type.PEAK) : signals.avgAmp.get(Type.VALLEY);
-				((TextView) findViewById(R.id.amp)).setText(Integer.toString(amp));
-				((TextView) findViewById(R.id.mean)).setText(
-						Integer.toString(signals.medianAmplitude));
 			}
 		});
 	}
