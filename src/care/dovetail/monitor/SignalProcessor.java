@@ -10,7 +10,7 @@ import android.util.Log;
 import care.dovetail.monitor.SignalProcessor.FeaturePoint.Type;
 
 public class SignalProcessor {
-	private static final String TAG = "PeakDetector";
+	private static final String TAG = "SignalProcessor";
 
 	private final int windowSize;
 	private final int halfWindow;

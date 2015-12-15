@@ -16,6 +16,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
@@ -48,6 +50,8 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 	private long lastUpdateTime = System.currentTimeMillis();
 
 	private Timer staleTimer;
+
+	private EcgDataWriter writer = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +121,31 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
     	}
         super.onStop();
     }
+
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()) {
+		case R.id.action_record:
+			if (((CheckBox) findViewById(R.id.connected)).isChecked()) {
+				if (writer == null) {
+					writer = new EcgDataWriter(this);
+					item.setTitle(getResources().getString(R.string.action_stop));
+				} else {
+					writer.close();
+					writer = null;
+					item.setTitle(getResources().getString(R.string.action_record));
+				}
+			}
+			break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
 
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -235,6 +264,10 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 	@Override
 	public void onNewValues(final int data[]) {
 		lastUpdateTime = System.currentTimeMillis();
+		if (writer != null) {
+			writer.write(data);
+		}
+
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {

@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="care.dovetail.MainActivity" >
+    
+    <item
+        android:id="@+id/action_record"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:title="@string/action_record" />
+    
+</menu>

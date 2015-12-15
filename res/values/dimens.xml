@@ -8,7 +8,7 @@
     
     <integer name="default_threshold1">80</integer>
     <integer name="max_threshold1">150</integer>
-    <integer name="default_threshold2">25</integer>
-    <integer name="max_threshold2">50</integer>
+    <integer name="default_threshold2">30</integer>
+    <integer name="max_threshold2">80</integer>
 
 </resources>
