@@ -1,6 +1,5 @@
 package care.dovetail.monitor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Fragment;
@@ -24,9 +23,7 @@ public class ChartFragment extends Fragment {
 	private PointsGraphSeries<DataPoint> peakDataSeries = new PointsGraphSeries<DataPoint>();
 	private PointsGraphSeries<DataPoint> valleyDataSeries = new PointsGraphSeries<DataPoint>();
 	private LineGraphSeries<DataPoint> median = new LineGraphSeries<DataPoint>();
-	// private LineGraphSeries<DataPoint> longSeries = new LineGraphSeries<DataPoint>();
-
-	private final List<Integer> cache = new ArrayList<Integer>(Config.NUM_SAMPLES_AVERAGE);
+	private LineGraphSeries<DataPoint> longSeries = new LineGraphSeries<DataPoint>();
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -56,13 +53,13 @@ public class ChartFragment extends Fragment {
 		median.setThickness(2);
 		median.setColor(getResources().getColor(android.R.color.darker_gray));
 
-//		GraphView longGraph = ((GraphView) view.findViewById(R.id.longGraph));
-//		longGraph.addSeries(longSeries);
-//		longSeries.setThickness(2);
-//		longSeries.setColor(getResources().getColor(android.R.color.holo_green_light));
+		GraphView longGraph = ((GraphView) view.findViewById(R.id.longGraph));
+		longGraph.addSeries(longSeries);
+		longSeries.setThickness(3);
+		longSeries.setColor(getResources().getColor(android.R.color.holo_green_light));
 
 		initializeGraph(graph, Config.DATA_LENGTH);
-//		initializeGraph(longGraph, Config.NUM_SAMPLES_LONG_TERM_GRAPH);
+		initializeGraph(longGraph, Config.NUM_SAMPLES_LONG_TERM_GRAPH);
 	}
 
 	private void initializeGraph(GraphView graph, double maxX) {
@@ -82,17 +79,9 @@ public class ChartFragment extends Fragment {
 	}
 
 	public void updateGraph(int data[]) {
-//		double highestX = longSeries.getHighestValueX();
 		DataPoint[] dataPoints = new DataPoint[data.length];
 		for (int i = 0; i < dataPoints.length; i++) {
 			dataPoints[i] = new DataPoint(i, data[i]);
-//				cache.add(data[i]);
-//				if (cache.size() == Config.NUM_SAMPLES_AVERAGE) {
-//					longSeries.appendData(new DataPoint(highestX + i / Config.NUM_SAMPLES_AVERAGE,
-//							average(cache.toArray(new Integer[0]))), true,
-//							Config.NUM_SAMPLES_LONG_TERM_GRAPH);
-//					cache.clear();
-//				}
 		}
 		dataSeries.resetData(dataPoints);
 	}
@@ -102,10 +91,16 @@ public class ChartFragment extends Fragment {
 		median.resetData(new DataPoint[] { new DataPoint(0, medianAmplitude),
 				new DataPoint(Config.DATA_LENGTH, medianAmplitude) });
 
+		double highestX = longSeries.getHighestValueX();
+		double ratio = Config.NUM_SAMPLES_LONG_TERM_GRAPH / Config.DATA_LENGTH;
 		DataPoint[] peakPoints = new DataPoint[peaks.size()];
 		for (int i = 0; i < peakPoints.length; i++) {
 			FeaturePoint peak = peaks.get(i);
 			peakPoints[i] = new DataPoint(peak.index, peak.amplitude);
+
+			DataPoint breath =
+					new DataPoint(highestX + peak.index / ratio, 2 * (256 - peak.amplitude));
+			longSeries.appendData(breath, true, Config.NUM_SAMPLES_LONG_TERM_GRAPH);
 		}
 
 		DataPoint[] valleyPoints = new DataPoint[valleys.size()];
@@ -116,13 +111,5 @@ public class ChartFragment extends Fragment {
 
 		peakDataSeries.resetData(peakPoints);
 		valleyDataSeries.resetData(valleyPoints);
-	}
-
-	private static int average(Integer values[]) {
-		int sum = 0;
-		for (int value : values) {
-			sum += value;
-		}
-		return sum / values.length;
 	}
 }

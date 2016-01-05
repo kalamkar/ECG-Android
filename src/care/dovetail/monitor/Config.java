@@ -13,8 +13,7 @@ public class Config {
 	public static final int SAMPLE_RATE = 200;
 	public static final int SAMPLE_INTERVAL_MS = 10;
 
-	public static final int NUM_SAMPLES_LONG_TERM_GRAPH = 5000;
-	public static final int NUM_SAMPLES_AVERAGE = 5;
+	public static final int NUM_SAMPLES_LONG_TERM_GRAPH = 1500;
 
 	public static final int UI_UPDATE_INTERVAL_MILLIS = 10000;
 
