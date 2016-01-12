@@ -119,6 +119,10 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
     	if (staleTimer != null) {
     		staleTimer.cancel();
     	}
+		if (writer != null) {
+			writer.close();
+			writer = null;
+		}
         super.onStop();
     }
 
