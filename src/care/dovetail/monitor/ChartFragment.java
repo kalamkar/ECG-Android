@@ -98,8 +98,9 @@ public class ChartFragment extends Fragment {
 			FeaturePoint peak = peaks.get(i);
 			peakPoints[i] = new DataPoint(peak.index, peak.amplitude);
 
-			DataPoint breath =
-					new DataPoint(highestX + peak.index / ratio, 2 * (256 - peak.amplitude));
+			FeaturePoint lastPeak = i == 0 ? peak : peaks.get(i - 1);
+			DataPoint breath = new DataPoint(highestX + peak.index / ratio,
+					Math.abs(peak.amplitude - lastPeak.amplitude) + 50);
 			longSeries.appendData(breath, true, Config.NUM_SAMPLES_LONG_TERM_GRAPH);
 		}
 
