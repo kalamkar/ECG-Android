@@ -6,7 +6,7 @@ import java.util.Locale;
 public class Config {
 	public static final long PEAK_UUID = 0x404846A1;
 	public static final long DATA_UUID = 0x404846A4;
-	public static final String BT_DEVICE_NAME = "Pregnansi";
+	public static final String BT_DEVICE_NAME = "DovetailV2";
 
 	public static final int DATA_LENGTH = 500;
 

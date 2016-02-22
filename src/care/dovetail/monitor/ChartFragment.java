@@ -73,9 +73,10 @@ public class ChartFragment extends Fragment {
 
     	graph.getViewport().setXAxisBoundsManual(true);
 		graph.getViewport().setMaxX(maxX);
-		graph.getViewport().setYAxisBoundsManual(true);
-		graph.getViewport().setMaxY(256.0);
-		graph.getViewport().setMinY(0.0);
+		// Disabled fixed range Y to accommodate 2 different devices with different scale o/p
+//		graph.getViewport().setYAxisBoundsManual(true);
+//		graph.getViewport().setMaxY(256);
+//		graph.getViewport().setMinY(-256);
 	}
 
 	public void updateGraph(int data[]) {
