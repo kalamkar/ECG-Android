@@ -53,6 +53,9 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 
 	private EcgDataWriter writer = null;
 
+	private final int data[] = new int[Config.GRAPH_LENGTH];
+	private int dataIndex = 0;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -266,18 +269,25 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 	}
 
 	@Override
-	public void onNewValues(final int data[]) {
+	public void onNewValues(final int chunk[]) {
 		lastUpdateTime = System.currentTimeMillis();
 		if (writer != null) {
-			writer.write(data);
+			writer.write(chunk);
 		}
+
+		System.arraycopy(chunk, 0, data, dataIndex, chunk.length);
+		if ((dataIndex + chunk.length) < data.length) {
+			dataIndex = dataIndex + chunk.length;
+			return;
+		}
+		dataIndex = 0;
 
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				ChartFragment fragment =
 						(ChartFragment) getFragmentManager().findFragmentById(R.id.chart);
-				if (fragment == null || data == null) {
+				if (fragment == null) {
 					return;
 				}
 

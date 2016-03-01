@@ -58,7 +58,7 @@ public class ChartFragment extends Fragment {
 		longSeries.setThickness(3);
 		longSeries.setColor(getResources().getColor(android.R.color.holo_green_light));
 
-		initializeGraph(graph, Config.DATA_LENGTH);
+		initializeGraph(graph, Config.GRAPH_LENGTH);
 		initializeGraph(longGraph, Config.NUM_SAMPLES_LONG_TERM_GRAPH);
 	}
 
@@ -90,10 +90,10 @@ public class ChartFragment extends Fragment {
 	public void updateMarkers(List<FeaturePoint> peaks, List<FeaturePoint> valleys,
 			int medianAmplitude) {
 		median.resetData(new DataPoint[] { new DataPoint(0, medianAmplitude),
-				new DataPoint(Config.DATA_LENGTH, medianAmplitude) });
+				new DataPoint(Config.GRAPH_LENGTH, medianAmplitude) });
 
 		double highestX = longSeries.getHighestValueX();
-		double ratio = Config.NUM_SAMPLES_LONG_TERM_GRAPH / Config.DATA_LENGTH;
+		double ratio = Config.NUM_SAMPLES_LONG_TERM_GRAPH / Config.GRAPH_LENGTH;
 		DataPoint[] peakPoints = new DataPoint[peaks.size()];
 		for (int i = 0; i < peakPoints.length; i++) {
 			FeaturePoint peak = peaks.get(i);

@@ -8,9 +8,8 @@ public class Config {
 	public static final long DATA_UUID = 0x404846A4;
 	public static final String BT_DEVICE_NAME = "DovetailV2";
 
-	public static final int DATA_LENGTH = 500;
+	public static final int GRAPH_LENGTH = 500;
 
-	public static final int SAMPLE_RATE = 200;
 	public static final int SAMPLE_INTERVAL_MS = 10;
 
 	public static final int NUM_SAMPLES_LONG_TERM_GRAPH = 1500;

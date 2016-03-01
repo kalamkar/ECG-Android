@@ -85,6 +85,10 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
     				Long.toHexString(peakValue.getUuid().getMostSignificantBits()),
     				Long.toHexString(sensorData.getUuid().getMostSignificantBits())));
     		listener.onServiceDiscovered(true);
+    	} else if (peakValue != null) {
+        		Log.d(TAG, String.format("Found PeakValue UUID %s",
+        				Long.toHexString(peakValue.getUuid().getMostSignificantBits())));
+        		listener.onServiceDiscovered(true);
     	} else {
     		Log.e(TAG, "Could not find PeakValue and/or Sensor Data.");
     		listener.onServiceDiscovered(false);
@@ -94,13 +98,19 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	@Override
 	public void onCharacteristicChanged(BluetoothGatt gatt,
 			BluetoothGattCharacteristic characteristic) {
-        gatt.readCharacteristic(sensorData);
+        // gatt.readCharacteristic(sensorData);
+		readCharacteristic(characteristic);
 		super.onCharacteristicChanged(gatt, characteristic);
 	}
 
 	@Override
 	public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic,
 			int status) {
+		readCharacteristic(characteristic);
+		super.onCharacteristicRead(gatt, characteristic, status);
+	}
+
+	private void readCharacteristic(BluetoothGattCharacteristic characteristic) {
 		byte[] values = characteristic.getValue();
 		int intValues[] = new int[values.length];
 		for (int i = 0; i < values.length; i++) {
@@ -108,7 +118,6 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 		}
 
 		listener.onNewValues(intValues);
-		super.onCharacteristicRead(gatt, characteristic, status);
 	}
 
 	public boolean isConnected() {
