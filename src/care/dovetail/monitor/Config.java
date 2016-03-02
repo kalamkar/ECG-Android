@@ -10,7 +10,7 @@ public class Config {
 	public static final int SAMPLE_INTERVAL_MS = 10;
 
 	public static final int GRAPH_LENGTH = 500;
-	public static final int LONG_TERM_GRAPH_LENGTH = 300;
+	public static final int LONG_TERM_GRAPH_LENGTH = 600; // 5 per second hence 600 = 2 minutes
 
 	public static final int UI_UPDATE_INTERVAL_MILLIS = 10000;
 

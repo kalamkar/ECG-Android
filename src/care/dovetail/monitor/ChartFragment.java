@@ -32,24 +32,37 @@ public class ChartFragment extends Fragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		int shortGraphMin = 64;
+		int shortGraphMax = 192;
+
 		ecg = ((ChartView) getView().findViewById(R.id.ecg));
 		ecg.setColor(Color.BLUE);
+		ecg.setXRange(0, Config.GRAPH_LENGTH);
+		ecg.setYRange(shortGraphMin, shortGraphMax);
 
 		peaks = ((ChartView) getView().findViewById(R.id.peaks));
 		peaks.setType(Type.POINT);
-		peaks.setSize(5);
+		peaks.setThickness(5);
 		peaks.setColor(getResources().getColor(android.R.color.holo_orange_dark));
+		peaks.setXRange(0, Config.GRAPH_LENGTH);
+		peaks.setYRange(shortGraphMin, shortGraphMax);
 
 		valleys = ((ChartView) getView().findViewById(R.id.valleys));
 		valleys.setType(Type.POINT);
-		valleys.setSize(5);
+		valleys.setThickness(5);
 		valleys.setColor(getResources().getColor(android.R.color.holo_blue_dark));
+		valleys.setXRange(0, Config.GRAPH_LENGTH);
+		valleys.setYRange(shortGraphMin, shortGraphMax);
 
 		median = ((ChartView) getView().findViewById(R.id.median));
 		median.setColor(getResources().getColor(android.R.color.darker_gray));
+		median.setXRange(0, Config.GRAPH_LENGTH);
+		median.setYRange(shortGraphMin, shortGraphMax);
 
 		breath = ((ChartView) getView().findViewById(R.id.breath));
 		breath.setColor(getResources().getColor(android.R.color.holo_green_light));
+		breath.setXRange(0, Config.LONG_TERM_GRAPH_LENGTH);
+		breath.setYRange(100, 192);
 	}
 
 	public void updateGraph(int data[]) {

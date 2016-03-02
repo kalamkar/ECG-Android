@@ -26,25 +26,35 @@ public class ChartView extends View {
 
 	private Type type;
 
+	private Pair<Integer, Integer> minMaxX = Pair.create(-1, -1);
+	private Pair<Integer, Integer> minMaxY = Pair.create(-1, -1);
+
 	public ChartView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		paint.setAntiAlias(true);
 		paint.setDither(true);
 		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeJoin(Paint.Join.ROUND);
-		paint.setStrokeCap(Paint.Cap.ROUND);
 	}
 
 	public void setType(Type type) {
 		this.type = type;
+		paint.setStyle(type == Type.POINT ? Paint.Style.FILL : Paint.Style.STROKE);
 	}
 
 	public void setColor(int color) {
 		paint.setColor(color);
 	}
 
-	public void setSize(int size) {
+	public void setThickness(int size) {
 		paint.setStrokeWidth(size);
+	}
+
+	public void setXRange(int min, int max) {
+		minMaxX = Pair.create(min, max);
+	}
+
+	public void setYRange(int min, int max) {
+		minMaxY = Pair.create(min, max);
 	}
 
 	@Override
@@ -68,6 +78,13 @@ public class ChartView extends View {
 	public void setData(List<Pair<Integer, Integer>> data) {
 		clearAll(bitmap.getWidth(), bitmap.getHeight());
 
+		if (minMaxX.first == -1 && minMaxX.second == -1) {
+			minMaxX = getMinMax(data, true);
+		}
+		if (minMaxY.first == -1 && minMaxY.second == -1) {
+			minMaxY = getMinMax(data, false);
+		}
+
 		if (data == null || data.size() == 0) {
 			invalidate();
 			return;
@@ -83,8 +100,6 @@ public class ChartView extends View {
 	}
 
 	private void drawPath(List<Pair<Integer, Integer>> data) {
-		Pair<Integer, Integer> minMaxX = getMinMax(data, true);
-		Pair<Integer, Integer> minMaxY = getMinMax(data, false);
 		Path path = new Path();
 		int lastX = getX(data.get(0).first, minMaxX.first, minMaxX.second);
 		int lastY = getY(data.get(0).second, minMaxY.first, minMaxY.second);
@@ -100,12 +115,9 @@ public class ChartView extends View {
 	}
 
 	private void drawPoints(List<Pair<Integer, Integer>> data) {
-		Pair<Integer, Integer> minMaxX = getMinMax(data, true);
-		Pair<Integer, Integer> minMaxY = getMinMax(data, false);
 		for (int i = 0; i < data.size(); i++) {
 			int x = getX(data.get(i).first, minMaxX.first, minMaxX.second);
 			int y = getY(data.get(i).second, minMaxY.first, minMaxY.second);
-			// bitmapCanvas.drawPoint(x, y, paint);
 			bitmapCanvas.drawCircle(x, y, paint.getStrokeWidth(), paint);
 		}
 	}
@@ -130,6 +142,6 @@ public class ChartView extends View {
 		if (max <= min) {
 			return 0;
 		}
-		return /* bitmap.getHeight() - */ (bitmap.getHeight() * (value - min) / (max - min));
+		return bitmap.getHeight() - (bitmap.getHeight() * (value - min) / (max - min));
 	}
 }

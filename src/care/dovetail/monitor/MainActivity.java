@@ -282,7 +282,7 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 		System.arraycopy(longData, 1, longData, 0, longData.length - 1);
 		int copyOfValues[] = chunk.clone();
 		Arrays.sort(copyOfValues);
-		longData[longData.length - 1] = copyOfValues[copyOfValues.length / 2];
+		longData[longData.length - 1] = copyOfValues[copyOfValues.length -1]; // Max value
 
 		System.arraycopy(data, chunk.length, data, 0, data.length - chunk.length);
 		System.arraycopy(chunk, 0, data, data.length - chunk.length, chunk.length);
