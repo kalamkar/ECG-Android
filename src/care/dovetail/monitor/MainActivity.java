@@ -1,5 +1,6 @@
 package care.dovetail.monitor;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -54,7 +55,10 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 	private EcgDataWriter writer = null;
 
 	private final int data[] = new int[Config.GRAPH_LENGTH];
-	private int dataIndex = 0;
+	private final int longData[] = new int[Config.LONG_TERM_GRAPH_LENGTH];
+	private int longDataIndex = longData.length - 1;
+
+	private int updateCount = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -270,17 +274,23 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 
 	@Override
 	public void onNewValues(final int chunk[]) {
-		lastUpdateTime = System.currentTimeMillis();
+		updateCount++;
 		if (writer != null) {
 			writer.write(chunk);
 		}
 
-		System.arraycopy(chunk, 0, data, dataIndex, chunk.length);
-		if ((dataIndex + chunk.length) < data.length) {
-			dataIndex = dataIndex + chunk.length;
+		System.arraycopy(longData, 1, longData, 0, longData.length - 1);
+		int copyOfValues[] = chunk.clone();
+		Arrays.sort(copyOfValues);
+		longData[longData.length - 1] = copyOfValues[copyOfValues.length / 2];
+
+		System.arraycopy(data, chunk.length, data, 0, data.length - chunk.length);
+		System.arraycopy(chunk, 0, data, data.length - chunk.length, chunk.length);
+		if (updateCount < 5) {
 			return;
 		}
-		dataIndex = 0;
+		updateCount = 0;
+		lastUpdateTime = System.currentTimeMillis();
 
 		runOnUiThread(new Runnable() {
 			@Override
@@ -300,6 +310,7 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 				List<FeaturePoint> valleys = signals.getFeaturePoints(Type.VALLEY);
 
 				fragment.updateGraph(data);
+				fragment.updateLongGraph(longData);
 				fragment.updateMarkers(peaks, valleys, signals.medianAmplitude);
 
 				int bpm = signals.bpm.get(Type.PEAK);
