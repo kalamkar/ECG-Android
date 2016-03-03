@@ -272,16 +272,13 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 	}
 
 	@Override
-	public void onNewValues(final int chunk[]) {
+	public void onNewValues(int chunk[]) {
 		updateCount++;
 		if (writer != null) {
 			writer.write(chunk);
 		}
 
-		System.arraycopy(longData, 1, longData, 0, longData.length - 1);
-		int copyOfValues[] = chunk.clone();
-		Arrays.sort(copyOfValues);
-		longData[longData.length - 1] = copyOfValues[copyOfValues.length -1]; // Max value
+		// updateLongData(chunk[]);
 
 		System.arraycopy(data, chunk.length, data, 0, data.length - chunk.length);
 		System.arraycopy(chunk, 0, data, data.length - chunk.length, chunk.length);
@@ -308,6 +305,8 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 				List<FeaturePoint> peaks = signals.getFeaturePoints(Type.PEAK);
 				List<FeaturePoint> valleys = signals.getFeaturePoints(Type.VALLEY);
 
+				updateLongData(peaks);
+
 				fragment.updateGraph(data);
 				fragment.updateLongGraph(longData);
 				fragment.updateMarkers(peaks, valleys, signals.medianAmplitude);
@@ -316,5 +315,21 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 				((TextView) findViewById(R.id.bpm)).setText(Integer.toString(bpm));
 			}
 		});
+	}
+
+	@SuppressWarnings("unused")
+	private void updateLongData(int chunk[]) {
+		System.arraycopy(longData, 1, longData, 0, longData.length - 1);
+		int copyOfValues[] = chunk.clone();
+		Arrays.sort(copyOfValues);
+		longData[longData.length - 1] = copyOfValues[copyOfValues.length / 2]; // Median value
+	}
+
+	private void updateLongData(List<FeaturePoint> points) {
+		System.arraycopy(longData, points.size(), longData, 0, longData.length - points.size());
+
+		for (int i = 0; i < points.size(); i++) {
+			longData[longData.length - (points.size() - i)] = points.get(i).amplitude;
+		}
 	}
 }

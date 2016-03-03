@@ -32,8 +32,11 @@ public class ChartFragment extends Fragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		int shortGraphMin = 64;
-		int shortGraphMax = 192;
+		int shortGraphMin = 64; 	//  64 for V2,  64 for V1
+		int shortGraphMax = 255; 	// 192 for V2, 255 for V1
+
+		int longGraphMin = 100;		// 100 for V2, 100 for V1
+		int longGraphMax = 255;		// 192 for V2, 255 for V1
 
 		ecg = ((ChartView) getView().findViewById(R.id.ecg));
 		ecg.setColor(Color.BLUE);
@@ -62,7 +65,7 @@ public class ChartFragment extends Fragment {
 		breath = ((ChartView) getView().findViewById(R.id.breath));
 		breath.setColor(getResources().getColor(android.R.color.holo_green_light));
 		breath.setXRange(0, Config.LONG_TERM_GRAPH_LENGTH);
-		breath.setYRange(100, 192);
+		breath.setYRange(longGraphMin, longGraphMax);
 	}
 
 	public void updateGraph(int data[]) {
@@ -88,16 +91,10 @@ public class ChartFragment extends Fragment {
 		medianPoints.add(Pair.create(Config.GRAPH_LENGTH - 1, medianAmplitude));
 		median.setData(medianPoints);
 
-//		double ratio = Config.NUM_SAMPLES_LONG_TERM_GRAPH / Config.GRAPH_LENGTH;
 		List<Pair<Integer, Integer>> peakPoints = new ArrayList<Pair<Integer, Integer>>();
 		for (int i = 0; i < peaks.size(); i++) {
 			FeaturePoint peak = peaks.get(i);
 			peakPoints.add(Pair.create(peak.index, peak.amplitude));
-
-//			FeaturePoint lastPeak = i == 0 ? peak : peaks.get(i - 1);
-//			DataPoint breath = new DataPoint(highestX + peak.index / ratio,
-//					Math.abs(peak.amplitude - lastPeak.amplitude) + 50);
-//			longSeries.appendData(breath, true, Config.NUM_SAMPLES_LONG_TERM_GRAPH);
 		}
 		this.peaks.setData(peakPoints);
 
