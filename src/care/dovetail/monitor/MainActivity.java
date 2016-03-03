@@ -56,7 +56,6 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 
 	private final int data[] = new int[Config.GRAPH_LENGTH];
 	private final int longData[] = new int[Config.LONG_TERM_GRAPH_LENGTH];
-	private int longDataIndex = longData.length - 1;
 
 	private int updateCount = 0;
 
