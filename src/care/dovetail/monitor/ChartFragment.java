@@ -32,40 +32,34 @@ public class ChartFragment extends Fragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		int shortGraphMin = 64; 	//  64 for V2,  64 for V1
-		int shortGraphMax = 255; 	// 192 for V2, 255 for V1
-
-		int longGraphMin = 100;		// 100 for V2, 100 for V1
-		int longGraphMax = 255;		// 192 for V2, 255 for V1
-
 		ecg = ((ChartView) getView().findViewById(R.id.ecg));
 		ecg.setColor(Color.BLUE);
 		ecg.setXRange(0, Config.GRAPH_LENGTH);
-		ecg.setYRange(shortGraphMin, shortGraphMax);
+		ecg.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
 
 		peaks = ((ChartView) getView().findViewById(R.id.peaks));
 		peaks.setType(Type.POINT);
 		peaks.setThickness(5);
 		peaks.setColor(getResources().getColor(android.R.color.holo_orange_dark));
 		peaks.setXRange(0, Config.GRAPH_LENGTH);
-		peaks.setYRange(shortGraphMin, shortGraphMax);
+		peaks.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
 
 		valleys = ((ChartView) getView().findViewById(R.id.valleys));
 		valleys.setType(Type.POINT);
 		valleys.setThickness(5);
 		valleys.setColor(getResources().getColor(android.R.color.holo_blue_dark));
 		valleys.setXRange(0, Config.GRAPH_LENGTH);
-		valleys.setYRange(shortGraphMin, shortGraphMax);
+		valleys.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
 
 		median = ((ChartView) getView().findViewById(R.id.median));
 		median.setColor(getResources().getColor(android.R.color.darker_gray));
 		median.setXRange(0, Config.GRAPH_LENGTH);
-		median.setYRange(shortGraphMin, shortGraphMax);
+		median.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
 
 		breath = ((ChartView) getView().findViewById(R.id.breath));
 		breath.setColor(getResources().getColor(android.R.color.holo_green_light));
 		breath.setXRange(0, Config.LONG_TERM_GRAPH_LENGTH);
-		breath.setYRange(longGraphMin, longGraphMax);
+		breath.setYRange(Config.LONG_GRAPH_MIN, Config.LONG_GRAPH_MAX);
 	}
 
 	public void updateGraph(int data[]) {

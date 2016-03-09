@@ -22,7 +22,6 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	private final BluetoothAdapter adapter;
 
 	private BluetoothGatt gatt;
-	private BluetoothGattCharacteristic peakValue;
 	private BluetoothGattCharacteristic sensorData;
 
 	private int state = BluetoothProfile.STATE_DISCONNECTED;
@@ -73,24 +72,18 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
     	for (BluetoothGattService service : gatt.getServices()) {
     		for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
     			long uuid = characteristic.getUuid().getMostSignificantBits() >> 32;
-    			if (uuid == Config.PEAK_UUID) {
-    				peakValue = characteristic;
-    			} else if (uuid == Config.DATA_UUID) {
+    			if (uuid == Config.DATA_UUID) {
     				sensorData = characteristic;
     			}
     		}
     	}
-    	if (peakValue != null && sensorData != null) {
-    		Log.d(TAG, String.format("Found PeakValue UUID %s and Sensor Data UUID %s",
-    				Long.toHexString(peakValue.getUuid().getMostSignificantBits()),
-    				Long.toHexString(sensorData.getUuid().getMostSignificantBits())));
-    		listener.onServiceDiscovered(true);
-    	} else if (peakValue != null) {
-        		Log.d(TAG, String.format("Found PeakValue UUID %s",
-        				Long.toHexString(peakValue.getUuid().getMostSignificantBits())));
+
+    	if (sensorData != null) {
+        		Log.d(TAG, String.format("Found data UUID %s",
+        				Long.toHexString(sensorData.getUuid().getMostSignificantBits())));
         		listener.onServiceDiscovered(true);
     	} else {
-    		Log.e(TAG, "Could not find PeakValue and/or Sensor Data.");
+    		Log.e(TAG, "Could not find Sensor Data characteristic.");
     		listener.onServiceDiscovered(false);
     	}
     }
@@ -136,12 +129,12 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	}
 
 	public boolean enableNotifications() {
-		if (peakValue == null) {
+		if (sensorData == null) {
 			return false;
 		}
 		boolean success = true;
-		success = success && gatt.setCharacteristicNotification(peakValue, true);
-		for (BluetoothGattDescriptor descriptor : peakValue.getDescriptors()) {
+		success = success && gatt.setCharacteristicNotification(sensorData, true);
+		for (BluetoothGattDescriptor descriptor : sensorData.getDescriptors()) {
 			descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
 			success = success && gatt.writeDescriptor(descriptor);
 		}
@@ -149,12 +142,12 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	}
 
 	public boolean disableNotifications() {
-		if (peakValue == null) {
+		if (sensorData == null) {
 			return false;
 		}
 		boolean success = true;
-		success = success && gatt.setCharacteristicNotification(peakValue, false);
-		for (BluetoothGattDescriptor descriptor : peakValue.getDescriptors()) {
+		success = success && gatt.setCharacteristicNotification(sensorData, false);
+		for (BluetoothGattDescriptor descriptor : sensorData.getDescriptors()) {
 			descriptor.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
 			success = success && gatt.writeDescriptor(descriptor);
 		}

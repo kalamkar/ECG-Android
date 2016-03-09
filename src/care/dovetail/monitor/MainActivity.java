@@ -21,8 +21,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.SeekBar;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
 import biz.source_code.dsp.filter.FilterCharacteristicsType;
@@ -33,7 +31,7 @@ import care.dovetail.monitor.BluetoothSmartClient.ConnectionListener;
 import care.dovetail.monitor.SignalProcessor.FeaturePoint;
 import care.dovetail.monitor.SignalProcessor.FeaturePoint.Type;
 
-public class MainActivity extends Activity implements OnSeekBarChangeListener, ConnectionListener {
+public class MainActivity extends Activity implements ConnectionListener {
 	private static final String TAG = "MainActivity";
 
 	private static final String BTLE_ADDRESS = "BTLE_ADDRESS";
@@ -76,15 +74,9 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 			startActivityForResult(enableBtIntent, 0);
 		}
 
-		SeekBar threshold1 = (SeekBar) findViewById(R.id.filter1);
-		SeekBar threshold2 = (SeekBar) findViewById(R.id.filter2);
-
-		threshold1.setOnSeekBarChangeListener(this);
-		threshold2.setOnSeekBarChangeListener(this);
-
 		filter = new IirFilter(IirFilterDesignFisher.design(
 				FilterPassType.lowpass, FilterCharacteristicsType.bessel, 4, 0, 0.1, 0));
-		signals = new SignalProcessor(threshold1.getProgress(), threshold2.getProgress());
+		signals = new SignalProcessor(Config.WINDOW_SIZE, Config.MINIMUM_SLOPE);
 
 		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
 		    Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_LONG).show();
@@ -155,30 +147,6 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 			break;
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
-	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-		long currentTime = System.currentTimeMillis();
-		if (fromUser && currentTime - lastChangeTime > Config.UI_UPDATE_INTERVAL_MILLIS) {
-			if (seekBar.getId() == R.id.filter1) {
-				((TextView) findViewById(R.id.filter1Text)).setText(Integer.toString(progress));
-			} else if (seekBar.getId() == R.id.filter2) {
-				((TextView) findViewById(R.id.filter2Text)).setText(Integer.toString(progress));
-			}
-			int windowSize = ((SeekBar) findViewById(R.id.filter1)).getProgress();
-			int minSlope = ((SeekBar) findViewById(R.id.filter2)).getProgress();
-			signals = new SignalProcessor(windowSize, minSlope);
-
-		}
-	}
-
-	@Override
-	public void onStartTrackingTouch(SeekBar seekBar) {
-	}
-
-	@Override
-	public void onStopTrackingTouch(SeekBar seekBar) {
 	}
 
 	private void startScan() {
@@ -305,7 +273,7 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener, C
 				List<FeaturePoint> peaks = signals.getFeaturePoints(Type.PEAK);
 				List<FeaturePoint> valleys = signals.getFeaturePoints(Type.VALLEY);
 
-				updateLongData(peaks);
+				// updateLongData(peaks);
 
 				fragment.updateGraph(data);
 				fragment.updateLongGraph(longData);
