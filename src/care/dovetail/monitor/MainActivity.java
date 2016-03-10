@@ -15,6 +15,9 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -42,8 +45,8 @@ public class MainActivity extends Activity implements ConnectionListener {
 	private BluetoothLeScanner scanner;
 	private BluetoothSmartClient patchClient;
 
-	IirFilter filter;
-	private SignalProcessor signals;
+	private IirFilter filter;
+	private final SignalProcessor signals = new SignalProcessor();
 
 	private long lastChangeTime = 0;
 	private long lastUpdateTime = System.currentTimeMillis();
@@ -56,6 +59,9 @@ public class MainActivity extends Activity implements ConnectionListener {
 	private final int longData[] = new int[Config.LONG_TERM_GRAPH_LENGTH];
 
 	private int updateCount = 0;
+	private int audioPlayCount = 0;
+
+	private AudioTrack player;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +82,6 @@ public class MainActivity extends Activity implements ConnectionListener {
 
 		filter = new IirFilter(IirFilterDesignFisher.design(
 				FilterPassType.lowpass, FilterCharacteristicsType.bessel, 4, 0, 0.1, 0));
-		signals = new SignalProcessor(Config.WINDOW_SIZE, Config.MINIMUM_SLOPE);
 
 		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
 		    Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_LONG).show();
@@ -105,14 +110,22 @@ public class MainActivity extends Activity implements ConnectionListener {
     protected void onStart() {
         super.onStart();
         startScan();
+		player = new  AudioTrack(AudioManager.STREAM_MUSIC,
+									4 * 1000 / Config.SAMPLE_INTERVAL_MS,
+									AudioFormat.CHANNEL_OUT_MONO,
+									AudioFormat.ENCODING_PCM_8BIT,
+									Config.GRAPH_LENGTH * 4,
+									AudioTrack.MODE_STREAM);
+		player.play();
     }
 
     @Override
     protected void onStop() {
     	stopScan();
     	if (patchClient != null) {
-    		patchClient.disableNotifications();
+    		// patchClient.disableNotifications();
     		patchClient.disconnect();
+    		patchClient = null;
     	}
     	if (staleTimer != null) {
     		staleTimer.cancel();
@@ -120,6 +133,9 @@ public class MainActivity extends Activity implements ConnectionListener {
 		if (writer != null) {
 			writer.close();
 			writer = null;
+		}
+		if (player != null) {
+			player.release();
 		}
         super.onStop();
     }
@@ -170,7 +186,7 @@ public class MainActivity extends Activity implements ConnectionListener {
 		public void onScanResult(int callbackType, ScanResult result) {
 			String name = result.getDevice().getName();
 			name = name == null ? result.getScanRecord().getDeviceName() : name;
-			if (Config.BT_DEVICE_NAME.equalsIgnoreCase(name)) {
+			if (name != null && name.startsWith(Config.BT_DEVICE_NAME_PREFIX)) {
 				stopScan();
 				Log.i(TAG, String.format("Found device %s", name));
 				patchClient = new BluetoothSmartClient(MainActivity.this, MainActivity.this,
@@ -242,6 +258,7 @@ public class MainActivity extends Activity implements ConnectionListener {
 	@Override
 	public void onNewValues(int chunk[]) {
 		updateCount++;
+		audioPlayCount++;
 		if (writer != null) {
 			writer.write(chunk);
 		}
@@ -250,11 +267,22 @@ public class MainActivity extends Activity implements ConnectionListener {
 
 		System.arraycopy(data, chunk.length, data, 0, data.length - chunk.length);
 		System.arraycopy(chunk, 0, data, data.length - chunk.length, chunk.length);
-		if (updateCount < 5) {
+		if (updateCount < Config.GRAPH_UPDATE_COUNT) {
 			return;
 		}
 		updateCount = 0;
 		lastUpdateTime = System.currentTimeMillis();
+
+		signals.update(data);
+		if (audioPlayCount == Config.GRAPH_LENGTH / chunk.length) {
+			audioPlayCount = 0;
+			try {
+				byte audio[] = getBytes(signals.getFeaturePoints(Type.PEAK));
+	            player.write(audio, 0, audio.length);
+	        } catch (Throwable t) {
+	        	Log.e(TAG, t.getCause() != null ? t.getCause().getMessage() : t.getMessage(), t);
+	        }
+		}
 
 		runOnUiThread(new Runnable() {
 			@Override
@@ -269,7 +297,6 @@ public class MainActivity extends Activity implements ConnectionListener {
 //					data[i] = (int) filter.step(data[i]);
 //				}
 
-				signals.update(data);
 				List<FeaturePoint> peaks = signals.getFeaturePoints(Type.PEAK);
 				List<FeaturePoint> valleys = signals.getFeaturePoints(Type.VALLEY);
 
@@ -299,5 +326,21 @@ public class MainActivity extends Activity implements ConnectionListener {
 		for (int i = 0; i < points.size(); i++) {
 			longData[longData.length - (points.size() - i)] = points.get(i).amplitude;
 		}
+	}
+
+	private static byte[] getBytes(List<FeaturePoint> points) {
+		byte bytes[] = new byte[Config.GRAPH_LENGTH * 4];
+		for (int i = 0; i < points.size(); i++) {
+			bytes[points.get(i).index * 4] = (byte) 200; // (byte) points.get(i).amplitude;
+			bytes[points.get(i).index * 4 + 1] = (byte) 255; // (byte) points.get(i).amplitude;
+			bytes[points.get(i).index * 4 + 2] = (byte) 255; // (byte) points.get(i).amplitude;
+			bytes[points.get(i).index * 4 + 3] = (byte) 200; // (byte) points.get(i).amplitude;
+		}
+		for (int i = 0; i < bytes.length; i++) {
+			if (bytes[i] == 0) {
+				bytes[i] = (byte) 128;
+			}
+		}
+		return bytes;
 	}
 }

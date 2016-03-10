@@ -12,9 +12,12 @@ import care.dovetail.monitor.SignalProcessor.FeaturePoint.Type;
 public class SignalProcessor {
 	private static final String TAG = "SignalProcessor";
 
-	private final int windowSize;
-	private final int halfWindow;
-	private final int minSlope;
+	private static final int WINDOW_SIZE = 500;
+	private static final int MINIMUM_SLOPE = 80;
+
+	private final int windowSize = WINDOW_SIZE;
+	private final int halfWindow = windowSize / 2;
+	private final int minSlope = MINIMUM_SLOPE;
 
 	private final List<FeaturePoint> features = new ArrayList<FeaturePoint>();
 
@@ -59,12 +62,6 @@ public class SignalProcessor {
 		}
 	}
 
-	public SignalProcessor(int windowSize, int minSlope) {
-		this.windowSize = windowSize;
-		this.halfWindow = windowSize / 2;
-		this.minSlope = minSlope;
-	}
-
 	public void update(int[] values) {
 		features.clear();
 		resetStats();
@@ -104,11 +101,11 @@ public class SignalProcessor {
 	        if (isPeak(i) && isSpike(i, left, right)) {
 	        	FeaturePoint prevPeak = findPreviousFeature(Type.PEAK, i - halfWindow);
 	        	if (prevPeak != null) {
-	        		Log.i(TAG, String.format("Peak within window of %d with val %d, %d val = %d",
+	        		Log.v(TAG, String.format("Peak within window of %d with val %d, %d val = %d",
 	        				i, values[i], prevPeak.index, prevPeak.amplitude));
 	                // Successive peak, keep only highest
 	                if (prevPeak.amplitude < values[i]) {
-	                	Log.i(TAG, "replacing peak");
+	                	Log.v(TAG, "replacing peak");
 	                	features.remove(prevPeak);
 	                	features.add(new FeaturePoint(Type.PEAK, i, values[i]));
 	                }
@@ -120,12 +117,12 @@ public class SignalProcessor {
 	        if (isValley(i) && isSpike(i, left, right)) {
 	        	FeaturePoint prevValley = findPreviousFeature(Type.VALLEY, i - halfWindow);
 	        	if (prevValley != null) {
-	                Log.i(TAG, String.format("Valley within window of %d with val %d, %d val = %d",
+	                Log.v(TAG, String.format("Valley within window of %d with val %d, %d val = %d",
 	                		i, values[i], prevValley.index, prevValley.amplitude));
 
 	                // Successive valley, keep only lowest
 	                if (prevValley.amplitude > values[i]) {
-	                	Log.i(TAG, "replacing valley");
+	                	Log.v(TAG, "replacing valley");
 	                	features.remove(prevValley);
 	                	features.add(new FeaturePoint(Type.VALLEY, i, values[i]));
 	                }
