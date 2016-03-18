@@ -1,6 +1,5 @@
 package care.dovetail.monitor;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -59,7 +58,7 @@ public class MainActivity extends Activity implements ConnectionListener {
 	private final int longData[] = new int[Config.LONG_TERM_GRAPH_LENGTH];
 
 	private int updateCount = 0;
-	private int audioPlayCount = 0;
+	private int audioBufferLength = 0;
 
 	private AudioTrack player;
 
@@ -258,15 +257,14 @@ public class MainActivity extends Activity implements ConnectionListener {
 	@Override
 	public void onNewValues(int chunk[]) {
 		updateCount++;
-		audioPlayCount++;
+		audioBufferLength += chunk.length;
 		if (writer != null) {
 			writer.write(chunk);
 		}
 
-		// updateLongData(chunk[]);
-
 		System.arraycopy(data, chunk.length, data, 0, data.length - chunk.length);
 		System.arraycopy(chunk, 0, data, data.length - chunk.length, chunk.length);
+		updateLongData(signals.medianAmplitude);
 		if (updateCount < Config.GRAPH_UPDATE_COUNT) {
 			return;
 		}
@@ -274,8 +272,8 @@ public class MainActivity extends Activity implements ConnectionListener {
 		lastUpdateTime = System.currentTimeMillis();
 
 		signals.update(data);
-		if (audioPlayCount == Config.GRAPH_LENGTH / chunk.length) {
-			audioPlayCount = 0;
+		if (audioBufferLength == Config.GRAPH_LENGTH) {
+			audioBufferLength = 0;
 			try {
 				byte audio[] = getBytes(signals.getFeaturePoints(Type.PEAK));
 	            player.write(audio, 0, audio.length);
@@ -293,14 +291,8 @@ public class MainActivity extends Activity implements ConnectionListener {
 					return;
 				}
 
-//				for (int i = 0; i < data.length; i++) {
-//					data[i] = (int) filter.step(data[i]);
-//				}
-
 				List<FeaturePoint> peaks = signals.getFeaturePoints(Type.PEAK);
 				List<FeaturePoint> valleys = signals.getFeaturePoints(Type.VALLEY);
-
-				// updateLongData(peaks);
 
 				fragment.updateGraph(data);
 				fragment.updateLongGraph(longData);
@@ -312,20 +304,9 @@ public class MainActivity extends Activity implements ConnectionListener {
 		});
 	}
 
-	@SuppressWarnings("unused")
-	private void updateLongData(int chunk[]) {
+	private void updateLongData(int lastValue) {
 		System.arraycopy(longData, 1, longData, 0, longData.length - 1);
-		int copyOfValues[] = chunk.clone();
-		Arrays.sort(copyOfValues);
-		longData[longData.length - 1] = copyOfValues[copyOfValues.length / 2]; // Median value
-	}
-
-	private void updateLongData(List<FeaturePoint> points) {
-		System.arraycopy(longData, points.size(), longData, 0, longData.length - points.size());
-
-		for (int i = 0; i < points.size(); i++) {
-			longData[longData.length - (points.size() - i)] = points.get(i).amplitude;
-		}
+		longData[longData.length - 1] = lastValue;
 	}
 
 	private static byte[] getBytes(List<FeaturePoint> points) {
