@@ -294,6 +294,7 @@ public class MainActivity extends Activity implements ConnectionListener {
 				List<FeaturePoint> peaks = signals.getFeaturePoints(Type.PEAK);
 				List<FeaturePoint> valleys = signals.getFeaturePoints(Type.VALLEY);
 
+				fragment.clear();
 				fragment.updateGraph(data);
 				fragment.updateLongGraph(longData);
 				fragment.updateMarkers(peaks, valleys, signals.medianAmplitude);

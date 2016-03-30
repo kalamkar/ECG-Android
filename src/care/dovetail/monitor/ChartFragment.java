@@ -10,17 +10,17 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import care.dovetail.monitor.ChartView.Type;
+import care.dovetail.monitor.ChartView.Chart;
 import care.dovetail.monitor.SignalProcessor.FeaturePoint;
 
 public class ChartFragment extends Fragment {
 	private static final String TAG = "ChartFragment";
 
-	private ChartView ecg;
-	private ChartView peaks;
-	private ChartView valleys;
-	private ChartView median;
-	private ChartView breath;
+	private Chart ecg;
+	private Chart peaks;
+	private Chart valleys;
+	private Chart median;
+	private Chart breath;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -32,34 +32,35 @@ public class ChartFragment extends Fragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		ecg = ((ChartView) getView().findViewById(R.id.ecg));
-		ecg.setColor(Color.BLUE);
+		ChartView ecgView = ((ChartView) getView().findViewById(R.id.ecg));
+		ecg = ecgView.makeLineChart(Color.BLUE, 1);
 		ecg.setXRange(0, Config.GRAPH_LENGTH);
 		ecg.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
 
-		peaks = ((ChartView) getView().findViewById(R.id.peaks));
-		peaks.setType(Type.POINT);
-		peaks.setThickness(5);
-		peaks.setColor(getResources().getColor(android.R.color.holo_orange_dark));
+		peaks =	ecgView.makePointsChart(
+					getResources().getColor(android.R.color.holo_orange_dark), 5);
 		peaks.setXRange(0, Config.GRAPH_LENGTH);
 		peaks.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
 
-		valleys = ((ChartView) getView().findViewById(R.id.valleys));
-		valleys.setType(Type.POINT);
-		valleys.setThickness(5);
-		valleys.setColor(getResources().getColor(android.R.color.holo_blue_dark));
+		valleys = ecgView.makePointsChart(
+					getResources().getColor(android.R.color.holo_blue_dark), 5);
 		valleys.setXRange(0, Config.GRAPH_LENGTH);
 		valleys.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
 
-		median = ((ChartView) getView().findViewById(R.id.median));
-		median.setColor(getResources().getColor(android.R.color.darker_gray));
+		median = ecgView.makeLineChart(getResources().getColor(android.R.color.darker_gray), 2);
 		median.setXRange(0, Config.GRAPH_LENGTH);
 		median.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
 
-		breath = ((ChartView) getView().findViewById(R.id.breath));
-		breath.setColor(getResources().getColor(android.R.color.holo_green_light));
+		ChartView breathView = ((ChartView) getView().findViewById(R.id.breath));
+		breath = breathView.makeLineChart(
+					getResources().getColor(android.R.color.holo_green_light), 2);
 		breath.setXRange(0, Config.LONG_TERM_GRAPH_LENGTH);
 		breath.setYRange(Config.LONG_GRAPH_MIN, Config.LONG_GRAPH_MAX);
+	}
+
+	public void clear() {
+		((ChartView) getView().findViewById(R.id.ecg)).clear();
+		((ChartView) getView().findViewById(R.id.breath)).clear();
 	}
 
 	public void updateGraph(int data[]) {
