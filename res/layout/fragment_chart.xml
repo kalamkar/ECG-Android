@@ -14,19 +14,4 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <care.dovetail.monitor.ChartView
-        android:id="@+id/peaks"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <care.dovetail.monitor.ChartView
-        android:id="@+id/valleys"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <care.dovetail.monitor.ChartView
-        android:id="@+id/median"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
 </FrameLayout>
