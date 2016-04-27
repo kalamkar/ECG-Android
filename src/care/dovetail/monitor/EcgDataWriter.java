@@ -20,21 +20,21 @@ public class EcgDataWriter {
 	private static final SimpleDateFormat FILE_NAME_FORMAT =
 			new SimpleDateFormat("MMM-dd-kk-mm-ss", Locale.US);
 
-	private final Context context;
+    private final App app;
     private File file;
     private BufferedOutputStream output;
 
-	public EcgDataWriter(Context context) {
-		this.context = context;
+	public EcgDataWriter(App app) {
+		this.app = app;
 		file = new File(
 				Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-				context.getResources().getString(R.string.app_name) + "-" +
+				app.getResources().getString(R.string.app_name) + "-" +
 				FILE_NAME_FORMAT.format(new Date()) + ".raw");
         try {
         	file.createNewFile();
         	output = new BufferedOutputStream(new FileOutputStream(file));
         } catch (Exception e){
-        	Log.e(TAG, "Error opening audio output RAW file.", e);
+        	Log.e(TAG, "Error opening output RAW file.", e);
         }
 	}
 
@@ -53,14 +53,15 @@ public class EcgDataWriter {
 	public void close() {
 		try {
     	    output.close();
+    	    app.addToUploadQueue(file.getAbsolutePath());
     	    DownloadManager downloads =
-    	    		(DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+    	    		(DownloadManager) app.getSystemService(Context.DOWNLOAD_SERVICE);
     	    downloads.addCompletedDownload(file.getName(), "ECG Raw Data", true,
     	    		"application/x-binary", file.getAbsolutePath(), file.length(), false);
-            MediaScannerConnection.scanFile(context, new String[] { file.getAbsolutePath() }, null,
+            MediaScannerConnection.scanFile(app, new String[] { file.getAbsolutePath() }, null,
             		null);
         } catch (Exception e){
-        	Log.e(TAG, "Error closing audio output stream and codec.", e);
+        	Log.e(TAG, "Error closing output stream and codec.", e);
         }
 	}
 }

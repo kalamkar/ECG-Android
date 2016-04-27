@@ -151,7 +151,7 @@ public class MainActivity extends Activity implements ConnectionListener {
 		case R.id.action_record:
 			if (((CheckBox) findViewById(R.id.connected)).isChecked()) {
 				if (writer == null) {
-					writer = new EcgDataWriter(this);
+					writer = new EcgDataWriter(app);
 					item.setTitle(getResources().getString(R.string.action_stop));
 				} else {
 					writer.close();

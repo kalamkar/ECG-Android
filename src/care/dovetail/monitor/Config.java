@@ -4,6 +4,10 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 public class Config {
+
+	public static final String API_URL = "http://dovetail-data-1.appspot.com";
+	public static final String RECORDING_URL = API_URL + "/recording";
+
 	public static final long DATA_UUID = 0x404846A1;
 	public static final String BT_DEVICE_NAME_PREFIX = "Dovetail";
 	public static final int SAMPLE_INTERVAL_MS = 1;
