@@ -14,8 +14,6 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.AudioFormat;
-import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Bundle;
 import android.util.Log;
@@ -53,6 +51,7 @@ public class MainActivity extends Activity implements ConnectionListener {
 	private Timer staleTimer;
 
 	private EcgDataWriter writer = null;
+	private boolean paused = false;
 
 	private final int data[] = new int[Config.GRAPH_LENGTH];
 	private final int longData[] = new int[Config.LONG_TERM_GRAPH_LENGTH];
@@ -109,13 +108,13 @@ public class MainActivity extends Activity implements ConnectionListener {
     protected void onStart() {
         super.onStart();
         startScan();
-		player = new  AudioTrack(AudioManager.STREAM_MUSIC,
-									4 * 1000 / Config.SAMPLE_INTERVAL_MS,
-									AudioFormat.CHANNEL_OUT_MONO,
-									AudioFormat.ENCODING_PCM_8BIT,
-									Config.GRAPH_LENGTH * 4,
-									AudioTrack.MODE_STREAM);
-		player.play();
+//		player = new  AudioTrack(AudioManager.STREAM_MUSIC,
+//									4 * 1000 / Config.SAMPLE_INTERVAL_MS,
+//									AudioFormat.CHANNEL_OUT_MONO,
+//									AudioFormat.ENCODING_PCM_8BIT,
+//									Config.GRAPH_LENGTH * 4,
+//									AudioTrack.MODE_STREAM);
+//		player.play();
     }
 
     @Override
@@ -154,6 +153,20 @@ public class MainActivity extends Activity implements ConnectionListener {
 					writer = new EcgDataWriter(app);
 					item.setTitle(getResources().getString(R.string.action_stop));
 				} else {
+					writer.close();
+					writer = null;
+					item.setTitle(getResources().getString(R.string.action_record));
+				}
+			}
+			break;
+		case R.id.action_pause:
+			if (paused) {
+				paused = false;
+				item.setIcon(getResources().getDrawable(android.R.drawable.ic_media_pause));
+			} else {
+				paused = true;
+				item.setIcon(getResources().getDrawable(android.R.drawable.ic_media_play));
+				if (writer != null) {
 					writer.close();
 					writer = null;
 					item.setTitle(getResources().getString(R.string.action_record));
@@ -270,6 +283,10 @@ public class MainActivity extends Activity implements ConnectionListener {
 		}
 		updateCount = 0;
 		lastUpdateTime = System.currentTimeMillis();
+
+		if (paused) {
+			return;
+		}
 
 		signals.update(data);
 		if (audioBufferLength == Config.GRAPH_LENGTH) {

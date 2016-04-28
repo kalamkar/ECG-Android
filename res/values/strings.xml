@@ -8,6 +8,8 @@
     <string name="action_disconnect">Disconnect</string>
     <string name="action_record">Record</string>
     <string name="action_stop">Stop</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_resume">Resume</string>
     
     <string name="home">Home</string>
     <string name="events">Events</string>

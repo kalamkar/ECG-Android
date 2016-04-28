@@ -10,13 +10,13 @@ public class Config {
 
 	public static final long DATA_UUID = 0x404846A1;
 	public static final String BT_DEVICE_NAME_PREFIX = "Dovetail";
-	public static final int SAMPLE_INTERVAL_MS = 1;
+	public static final int SAMPLE_INTERVAL_MS = 5;
 
-	public static final int GRAPH_LENGTH = 2000;
+	public static final int GRAPH_LENGTH = 5000;
 	public static final int LONG_TERM_GRAPH_LENGTH = 6000; // 5 per second hence 600 = 2 minutes
 
 	public static final int SHORT_GRAPH_MIN = 0; 	//  64 for V2,  64 for V1
-	public static final int SHORT_GRAPH_MAX = 255; 	// 192 for V2, 255 for V1
+	public static final int SHORT_GRAPH_MAX = 275; 	// 192 for V2, 255 for V1
 
 	public static final int LONG_GRAPH_MIN = 100;		// 100 for V2, 100 for V1
 	public static final int LONG_GRAPH_MAX = 255;		// 192 for V2, 255 for V1

@@ -2,9 +2,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="care.dovetail.MainActivity" >
     
+    
+    <item
+        android:id="@+id/action_pause"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:icon="@android:drawable/ic_media_pause"
+        android:title="@string/action_pause" />
+    
     <item
         android:id="@+id/action_record"
-        android:orderInCategory="100"
+        android:orderInCategory="101"
         android:showAsAction="always"
         android:title="@string/action_record" />
     

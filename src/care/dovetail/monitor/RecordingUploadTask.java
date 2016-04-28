@@ -24,10 +24,11 @@ public class RecordingUploadTask extends AsyncTask<Void, Void, Integer> {
 		try {
 			byte data[] = readFileData(filename);
 			String appName = app.getResources().getString(R.string.app_name);
-			String tags = String.format("%s,%s,%s",
+			String tags = String.format("%s,%s,%s,%s",
 					new File(filename).getName().replace(appName + "-", "").replace(".raw", ""),
 					Build.MANUFACTURER,
-					Build.MODEL);
+					Build.MODEL,
+					String.format("%dHz", 1000 / Config.SAMPLE_INTERVAL_MS));
 			String url = String.format("%s?tags=%s", Config.RECORDING_URL, tags.replaceAll(" ", "+"));
 			Pair<Integer, String> response = Utils.uploadFile(url, "application/binary", data);
 			Log.d(TAG, String.format("%d: %s", response.first, response.second));
