@@ -14,6 +14,8 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Bundle;
 import android.util.Log;
@@ -108,13 +110,13 @@ public class MainActivity extends Activity implements ConnectionListener {
     protected void onStart() {
         super.onStart();
         startScan();
-//		player = new  AudioTrack(AudioManager.STREAM_MUSIC,
-//									4 * 1000 / Config.SAMPLE_INTERVAL_MS,
-//									AudioFormat.CHANNEL_OUT_MONO,
-//									AudioFormat.ENCODING_PCM_8BIT,
-//									Config.GRAPH_LENGTH * 4,
-//									AudioTrack.MODE_STREAM);
-//		player.play();
+		player = new  AudioTrack(AudioManager.STREAM_MUSIC,
+									Config.AUDIO_PLAYBACK_RATE,
+									AudioFormat.CHANNEL_OUT_MONO,
+									AudioFormat.ENCODING_PCM_8BIT,
+									Config.GRAPH_LENGTH * Config.AUDIO_BYTES_PER_SAMPLE,
+									AudioTrack.MODE_STREAM);
+		player.play();
     }
 
     @Override
@@ -328,12 +330,12 @@ public class MainActivity extends Activity implements ConnectionListener {
 	}
 
 	private static byte[] getBytes(List<FeaturePoint> points) {
-		byte bytes[] = new byte[Config.GRAPH_LENGTH * 4];
+		byte bytes[] = new byte[Config.GRAPH_LENGTH * Config.AUDIO_BYTES_PER_SAMPLE];
 		for (int i = 0; i < points.size(); i++) {
-			bytes[points.get(i).index * 4] = (byte) 200; // (byte) points.get(i).amplitude;
-			bytes[points.get(i).index * 4 + 1] = (byte) 255; // (byte) points.get(i).amplitude;
-			bytes[points.get(i).index * 4 + 2] = (byte) 255; // (byte) points.get(i).amplitude;
-			bytes[points.get(i).index * 4 + 3] = (byte) 200; // (byte) points.get(i).amplitude;
+			for (int j = 0; j < Config.AUDIO_BYTES_PER_SAMPLE; j++) {
+				int value = (int) Math.round(Math.random() * 255);
+				bytes[points.get(i).index * Config.AUDIO_BYTES_PER_SAMPLE + j] = (byte) value;
+			}
 		}
 		for (int i = 0; i < bytes.length; i++) {
 			if (bytes[i] == 0) {

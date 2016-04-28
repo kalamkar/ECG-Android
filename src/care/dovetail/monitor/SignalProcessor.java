@@ -12,7 +12,7 @@ import care.dovetail.monitor.SignalProcessor.FeaturePoint.Type;
 public class SignalProcessor {
 	private static final String TAG = "SignalProcessor";
 
-	private static final int WINDOW_SIZE = 500;
+	private static final int WINDOW_SIZE = 100;
 	private static final int MINIMUM_SLOPE = 80;
 
 	private final int windowSize = WINDOW_SIZE;
