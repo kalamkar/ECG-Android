@@ -16,7 +16,7 @@ public class Config {
 	public static final int AUDIO_BYTES_PER_SAMPLE =
 			AUDIO_PLAYBACK_RATE / (1000 / SAMPLE_INTERVAL_MS);
 
-	public static final int GRAPH_LENGTH = 3000;
+	public static final int GRAPH_LENGTH = 2000;
 	public static final int LONG_TERM_GRAPH_LENGTH = 1200; // 5 per second hence 600 = 2 minutes
 
 	public static final int SHORT_GRAPH_MIN = 0; 	//  64 for V2,  64 for V1

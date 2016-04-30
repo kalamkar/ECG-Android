@@ -11,14 +11,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import care.dovetail.monitor.ChartView.Chart;
-import care.dovetail.monitor.SignalProcessor.FeaturePoint;
+import care.dovetail.monitor.NewSignalProcessor.FeaturePoint;
 
 public class ChartFragment extends Fragment {
 	private static final String TAG = "ChartFragment";
 
 	private Chart ecg;
 	private Chart peaks;
-	private Chart valleys;
 	private Chart median;
 	private Chart breath;
 
@@ -41,11 +40,6 @@ public class ChartFragment extends Fragment {
 					getResources().getColor(android.R.color.holo_orange_dark), 5);
 		peaks.setXRange(0, Config.GRAPH_LENGTH);
 		peaks.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
-
-		valleys = ecgView.makePointsChart(
-					getResources().getColor(android.R.color.holo_blue_dark), 5);
-		valleys.setXRange(0, Config.GRAPH_LENGTH);
-		valleys.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
 
 		median = ecgView.makeLineChart(getResources().getColor(android.R.color.darker_gray), 2);
 		median.setXRange(0, Config.GRAPH_LENGTH);
@@ -79,8 +73,7 @@ public class ChartFragment extends Fragment {
 		breath.setData(points);
 	}
 
-	public void updateMarkers(List<FeaturePoint> peaks, List<FeaturePoint> valleys,
-			int medianAmplitude) {
+	public void updateMarkers(List<FeaturePoint> peaks, int medianAmplitude) {
 		List<Pair<Integer, Integer>> medianPoints = new ArrayList<Pair<Integer, Integer>>(2);
 		medianPoints.add(Pair.create(0, medianAmplitude));
 		medianPoints.add(Pair.create(Config.GRAPH_LENGTH - 1, medianAmplitude));
@@ -89,15 +82,8 @@ public class ChartFragment extends Fragment {
 		List<Pair<Integer, Integer>> peakPoints = new ArrayList<Pair<Integer, Integer>>();
 		for (int i = 0; i < peaks.size(); i++) {
 			FeaturePoint peak = peaks.get(i);
-			peakPoints.add(Pair.create(peak.index, peak.amplitude));
+			peakPoints.add(Pair.create(peak.index, medianAmplitude));
 		}
 		this.peaks.setData(peakPoints);
-
-		List<Pair<Integer, Integer>> valleyPoints = new ArrayList<Pair<Integer, Integer>>();
-		for (int i = 0; i < valleys.size(); i++) {
-			FeaturePoint valley = valleys.get(i);
-			valleyPoints.add(Pair.create(valley.index, valley.amplitude));
-		}
-		this.valleys.setData(valleyPoints);
 	}
 }

@@ -30,22 +30,20 @@ import biz.source_code.dsp.filter.FilterPassType;
 import biz.source_code.dsp.filter.IirFilter;
 import biz.source_code.dsp.filter.IirFilterDesignFisher;
 import care.dovetail.monitor.BluetoothSmartClient.ConnectionListener;
-import care.dovetail.monitor.SignalProcessor.FeaturePoint;
-import care.dovetail.monitor.SignalProcessor.FeaturePoint.Type;
+import care.dovetail.monitor.NewSignalProcessor.FeaturePoint;
 
 public class MainActivity extends Activity implements ConnectionListener {
 	private static final String TAG = "MainActivity";
 
 	private static final String BTLE_ADDRESS = "BTLE_ADDRESS";
 
-	@SuppressWarnings("unused")
 	private App app;
 
 	private BluetoothLeScanner scanner;
 	private BluetoothSmartClient patchClient;
 
 	private IirFilter filter;
-	private final SignalProcessor signals = new SignalProcessor();
+	private final NewSignalProcessor signals = new NewSignalProcessor();
 
 	private long lastChangeTime = 0;
 	private long lastUpdateTime = System.currentTimeMillis();
@@ -291,15 +289,15 @@ public class MainActivity extends Activity implements ConnectionListener {
 		}
 
 		signals.update(data);
-		if (audioBufferLength == Config.GRAPH_LENGTH) {
-			audioBufferLength = 0;
-			try {
-				byte audio[] = getBytes(signals.getFeaturePoints(Type.PEAK));
-	            player.write(audio, 0, audio.length);
-	        } catch (Throwable t) {
-	        	Log.e(TAG, t.getCause() != null ? t.getCause().getMessage() : t.getMessage(), t);
-	        }
-		}
+//		if (audioBufferLength == Config.GRAPH_LENGTH) {
+//			audioBufferLength = 0;
+//			try {
+//				byte audio[] = getBytes(signals.getFeaturePoints(FeaturePoint.Type.QRS));
+//	            player.write(audio, 0, audio.length);
+//	        } catch (Throwable t) {
+//	        	Log.e(TAG, t.getCause() != null ? t.getCause().getMessage() : t.getMessage(), t);
+//	        }
+//		}
 
 		runOnUiThread(new Runnable() {
 			@Override
@@ -310,16 +308,14 @@ public class MainActivity extends Activity implements ConnectionListener {
 					return;
 				}
 
-				List<FeaturePoint> peaks = signals.getFeaturePoints(Type.PEAK);
-				List<FeaturePoint> valleys = signals.getFeaturePoints(Type.VALLEY);
+				List<FeaturePoint> peaks = signals.getFeaturePoints(FeaturePoint.Type.QRS);
 
 				fragment.clear();
 				fragment.updateGraph(data);
 				fragment.updateLongGraph(longData);
-				fragment.updateMarkers(peaks, valleys, signals.medianAmplitude);
+				fragment.updateMarkers(peaks, signals.medianAmplitude);
 
-				int bpm = signals.bpm.get(Type.PEAK);
-				((TextView) findViewById(R.id.bpm)).setText(Integer.toString(bpm));
+				((TextView) findViewById(R.id.bpm)).setText(Integer.toString(signals.bpm));
 			}
 		});
 	}
@@ -333,7 +329,7 @@ public class MainActivity extends Activity implements ConnectionListener {
 		byte bytes[] = new byte[Config.GRAPH_LENGTH * Config.AUDIO_BYTES_PER_SAMPLE];
 		for (int i = 0; i < points.size(); i++) {
 			for (int j = 0; j < Config.AUDIO_BYTES_PER_SAMPLE; j++) {
-				int value = (int) Math.round(Math.random() * 255);
+				int value = (int) (128 - Math.round(Math.random() * 255));
 				bytes[points.get(i).index * Config.AUDIO_BYTES_PER_SAMPLE + j] = (byte) value;
 			}
 		}
