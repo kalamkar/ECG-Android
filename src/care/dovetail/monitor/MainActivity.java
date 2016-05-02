@@ -328,15 +328,13 @@ public class MainActivity extends Activity implements ConnectionListener {
 
 	private static byte[] getBytes(List<FeaturePoint> points) {
 		byte bytes[] = new byte[Config.GRAPH_LENGTH * Config.AUDIO_BYTES_PER_SAMPLE];
+		for (int i = 0; i < bytes.length; i++) {
+			bytes[i] = (byte) 128;
+		}
 		for (int i = 0; i < points.size(); i++) {
 			for (int j = 0; j < Config.AUDIO_BYTES_PER_SAMPLE; j++) {
-				int value = (int) (128 - Math.round(Math.random() * 255));
+				int value = (int) (128 - Math.sin( Math.toRadians(30 / (j + 1)) ) * 255);
 				bytes[points.get(i).index * Config.AUDIO_BYTES_PER_SAMPLE + j] = (byte) value;
-			}
-		}
-		for (int i = 0; i < bytes.length; i++) {
-			if (bytes[i] == 0) {
-				bytes[i] = (byte) 128;
 			}
 		}
 		return bytes;
