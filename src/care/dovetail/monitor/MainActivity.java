@@ -17,6 +17,7 @@ import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -54,7 +55,6 @@ public class MainActivity extends Activity implements ConnectionListener {
 	private boolean paused = false;
 
 	private final int data[] = new int[Config.GRAPH_LENGTH];
-	private final int longData[] = new int[Config.LONG_TERM_GRAPH_LENGTH];
 
 	private int updateCount = 0;
 	private int audioBufferLength = 0;
@@ -277,7 +277,6 @@ public class MainActivity extends Activity implements ConnectionListener {
 
 		System.arraycopy(data, chunk.length, data, 0, data.length - chunk.length);
 		System.arraycopy(chunk, 0, data, data.length - chunk.length, chunk.length);
-		updateLongData(signals.medianAmplitude);
 		if (updateCount < Config.GRAPH_UPDATE_COUNT) {
 			return;
 		}
@@ -289,15 +288,22 @@ public class MainActivity extends Activity implements ConnectionListener {
 		}
 
 		signals.update(data);
-//		if (audioBufferLength == Config.GRAPH_LENGTH) {
-//			audioBufferLength = 0;
-//			try {
-//				byte audio[] = getBytes(signals.getFeaturePoints(FeaturePoint.Type.QRS));
-//	            player.write(audio, 0, audio.length);
-//	        } catch (Throwable t) {
-//	        	Log.e(TAG, t.getCause() != null ? t.getCause().getMessage() : t.getMessage(), t);
-//	        }
-//		}
+		if (audioBufferLength == Config.GRAPH_LENGTH) {
+			audioBufferLength = 0;
+			new AsyncTask<Void, Void, Void>() {
+				@Override
+				protected Void doInBackground(Void... params) {
+					try {
+						byte audio[] = getBytes(signals.getFeaturePoints(FeaturePoint.Type.QRS));
+						player.write(audio, 0, audio.length);
+					} catch (Throwable t) {
+						Log.e(TAG, t.getCause() != null
+								? t.getCause().getMessage() : t.getMessage(), t);
+					}
+					return null;
+				}
+			}.execute();
+		}
 
 		runOnUiThread(new Runnable() {
 			@Override
@@ -312,17 +318,12 @@ public class MainActivity extends Activity implements ConnectionListener {
 
 				fragment.clear();
 				fragment.updateGraph(data);
-				fragment.updateLongGraph(longData);
+				// fragment.updateLongGraph(peaks);
 				fragment.updateMarkers(peaks, signals.medianAmplitude);
 
 				((TextView) findViewById(R.id.bpm)).setText(Integer.toString(signals.bpm));
 			}
 		});
-	}
-
-	private void updateLongData(int lastValue) {
-		System.arraycopy(longData, 1, longData, 0, longData.length - 1);
-		longData[longData.length - 1] = lastValue;
 	}
 
 	private static byte[] getBytes(List<FeaturePoint> points) {
