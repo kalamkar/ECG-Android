@@ -12,6 +12,7 @@ public class NewSignalProcessor {
 
 	private static final int WINDOW_SIZE = 24;
 	private static final int MIN_QRS_HEIGHT = 50;
+	private static final int MIN_NUM_INTERVALS_FOR_BPM = 5;
 
 	private final int windowSize = WINDOW_SIZE;
 	private final int minQrsHeight = MIN_QRS_HEIGHT;
@@ -158,10 +159,14 @@ public class NewSignalProcessor {
 		for (int i = 0; i < indices.length - 1; i++) {
 			intervals[i] = indices[i+1] - indices[i];
 		}
+		// Update BPM only when there are sufficient number of RR intervals.
+		if (intervals.length < MIN_NUM_INTERVALS_FOR_BPM) {
+			return;
+		}
 		Arrays.sort(intervals);
 		int medianInterval = intervals[intervals.length / 2];
 		bpm = 60000 / (medianInterval * Config.SAMPLE_INTERVAL_MS);
-		// TODO(abhi): Use BPM only when there are sufficient number of distances.
+
 	}
 
 	private void removeQrsOutliers() {

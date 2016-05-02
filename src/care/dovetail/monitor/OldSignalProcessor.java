@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import android.util.Log;
-import care.dovetail.monitor.SignalProcessor.FeaturePoint.Type;
+import care.dovetail.monitor.OldSignalProcessor.FeaturePoint.Type;
 
-public class SignalProcessor {
+public class OldSignalProcessor {
 	private static final String TAG = "SignalProcessor";
 
 	private static final int WINDOW_SIZE = 100;
