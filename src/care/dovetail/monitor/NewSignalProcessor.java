@@ -10,9 +10,10 @@ import care.dovetail.monitor.NewSignalProcessor.FeaturePoint.Type;
 public class NewSignalProcessor {
 	private static final String TAG = "NewSignalProcessor";
 
-	private static final int WINDOW_SIZE = 24;
+	private static final int WINDOW_SIZE = 120 / Config.SAMPLE_INTERVAL_MS; // 120ms max QRS time
 	private static final int MIN_QRS_HEIGHT = 50;
 	private static final int MIN_NUM_INTERVALS_FOR_BPM = 5;
+	private static final float QRS_AMPLITUDE_TOLERANCE = 0.3f;  // 30% tolerance
 
 	private final int windowSize = WINDOW_SIZE;
 	private final int minQrsHeight = MIN_QRS_HEIGHT;
@@ -174,7 +175,8 @@ public class NewSignalProcessor {
 		if (qrss.size() > 2) {
 			int median = getMedianQrsHeight(qrss);
 			for (FeaturePoint qrs : qrss) {
-				if (qrs.height < median * 0.9 || qrs.height > median * 1.1) {
+				if (qrs.height < median - (median * QRS_AMPLITUDE_TOLERANCE)
+						|| qrs.height > median + (median * QRS_AMPLITUDE_TOLERANCE)) {
 					features.remove(qrs);
 				}
 			}

@@ -82,7 +82,8 @@ public class ChartFragment extends Fragment {
 		List<Pair<Integer, Integer>> peakPoints = new ArrayList<Pair<Integer, Integer>>();
 		for (int i = 0; i < peaks.size(); i++) {
 			FeaturePoint peak = peaks.get(i);
-			peakPoints.add(Pair.create(peak.index, medianAmplitude));
+			peakPoints.add(Pair.create(peak.index, peak.min));
+			peakPoints.add(Pair.create(peak.index, peak.max));
 		}
 		this.peaks.setData(peakPoints);
 	}
