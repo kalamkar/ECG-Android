@@ -37,7 +37,7 @@ public class ChartFragment extends Fragment {
 		ecg.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
 
 		peaks =	ecgView.makePointsChart(
-					getResources().getColor(android.R.color.holo_orange_dark), 5);
+					getResources().getColor(android.R.color.holo_orange_dark), 3);
 		peaks.setXRange(0, Config.GRAPH_LENGTH);
 		peaks.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
 
@@ -47,7 +47,7 @@ public class ChartFragment extends Fragment {
 
 		ChartView breathView = ((ChartView) getView().findViewById(R.id.breath));
 		breath = breathView.makePointsChart(
-					getResources().getColor(android.R.color.holo_green_light), 10);
+					getResources().getColor(android.R.color.holo_green_light), 5);
 		breath.setXRange(0, Config.GRAPH_LENGTH);
 		breath.setYRange(Config.LONG_GRAPH_MIN, Config.LONG_GRAPH_MAX);
 	}

@@ -3,43 +3,19 @@
 
     <string name="app_name">Dovetail BT</string>
     
-    <string name="action_settings">Settings</string>
-    <string name="action_bt_scan">Scan devices</string>
-    <string name="action_disconnect">Disconnect</string>
     <string name="action_record">Record</string>
     <string name="action_stop">Stop</string>
     <string name="action_pause">Pause</string>
     <string name="action_resume">Resume</string>
     
-    <string name="home">Home</string>
-    <string name="events">Events</string>
-    
-    <string name="bluetooth">Bluetooth</string>
-    <string name="connected">Connected</string>
-    
     <string name="seconds">sec</string>
-    <string name="bpm">bpm</string>
-    <string name="peaks">peaks</string>
-    <string name="valleys">valleys</string>
-    <string name="freq">freq</string>
-    <string name="amp">amp</string>
-    <string name="mean">mean</string>
+    <string name="bpm">beats/min</string>
     
-    <string name="compress">Compress</string>
-    <string name="filter_threshold">Filter Threshold</string>
-    <string name="gain">Gain</string>
-    <string name="threshold1">Window</string>
-    <string name="threshold2">Slope</string>
-    <string name="beat">beat</string>
-    <string name="record_kick">Record Kick</string>
-    
-    <string name="recorded_kick">Recorded Kick</string>
-    <string name="detected_kick">Detected Kick</string>
-    <string name="heart_rate">Heart Rate</string>
-    <string name="baby_monitor_is_working">Baby monitor is connected.</string>
-    <string name="baby_monitor_is_not_working">Baby monitor is NOT connected.</string>
-    <string name="starting_service">Starting baby monitor</string>
-    <string name="unknown">Unknown</string>
+    <string name="freeze">freeze</string>
+    <string name="record">record</string>
+    <string name="sound">sound</string>
+    <string name="connected">connected</string>
+    <string name="connecting">connecting</string>
     
     <string name="ble_not_supported">Bluetooth LE not supported.</string>
 

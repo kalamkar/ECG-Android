@@ -1,8 +1,6 @@
 package care.dovetail.monitor;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -20,10 +18,9 @@ import android.media.AudioTrack;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.CheckBox;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import biz.source_code.dsp.filter.FilterCharacteristicsType;
@@ -33,7 +30,7 @@ import biz.source_code.dsp.filter.IirFilterDesignFisher;
 import care.dovetail.monitor.BluetoothSmartClient.ConnectionListener;
 import care.dovetail.monitor.NewSignalProcessor.FeaturePoint;
 
-public class MainActivity extends Activity implements ConnectionListener {
+public class MainActivity extends Activity implements ConnectionListener, OnClickListener {
 	private static final String TAG = "MainActivity";
 
 	private static final String BTLE_ADDRESS = "BTLE_ADDRESS";
@@ -46,13 +43,11 @@ public class MainActivity extends Activity implements ConnectionListener {
 	private IirFilter filter;
 	private final NewSignalProcessor signals = new NewSignalProcessor();
 
-	private long lastChangeTime = 0;
 	private long lastUpdateTime = System.currentTimeMillis();
 
-	private Timer staleTimer;
-
-	private EcgDataWriter writer = null;
+	private boolean connected = false;
 	private boolean paused = false;
+	private EcgDataWriter writer = null;
 
 	private final int data[] = new int[Config.GRAPH_LENGTH];
 
@@ -83,10 +78,11 @@ public class MainActivity extends Activity implements ConnectionListener {
 
 		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
 		    Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_LONG).show();
-		    ((CheckBox) findViewById(R.id.ble)).setChecked(false);
-		} else {
-			((CheckBox) findViewById(R.id.ble)).setChecked(true);
 		}
+
+		findViewById(R.id.record).setOnClickListener(this);
+		findViewById(R.id.freeze).setOnClickListener(this);
+		findViewById(R.id.mute).setOnClickListener(this);
 	}
 
 	@Override
@@ -108,13 +104,6 @@ public class MainActivity extends Activity implements ConnectionListener {
     protected void onStart() {
         super.onStart();
         startScan();
-		player = new  AudioTrack(AudioManager.STREAM_MUSIC,
-									Config.AUDIO_PLAYBACK_RATE,
-									AudioFormat.CHANNEL_OUT_MONO,
-									AudioFormat.ENCODING_PCM_8BIT,
-									Config.GRAPH_LENGTH * Config.AUDIO_BYTES_PER_SAMPLE,
-									AudioTrack.MODE_STREAM);
-		player.play();
     }
 
     @Override
@@ -124,9 +113,6 @@ public class MainActivity extends Activity implements ConnectionListener {
     		// patchClient.disableNotifications();
     		patchClient.disconnect();
     		patchClient = null;
-    	}
-    	if (staleTimer != null) {
-    		staleTimer.cancel();
     	}
 		if (writer != null) {
 			writer.close();
@@ -138,43 +124,52 @@ public class MainActivity extends Activity implements ConnectionListener {
         super.onStop();
     }
 
-    @Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch(item.getItemId()) {
-		case R.id.action_record:
-			if (((CheckBox) findViewById(R.id.connected)).isChecked()) {
-				if (writer == null) {
-					writer = new EcgDataWriter(app);
-					item.setTitle(getResources().getString(R.string.action_stop));
-				} else {
-					writer.close();
-					writer = null;
-					item.setTitle(getResources().getString(R.string.action_record));
-				}
+	public void onClick(View view) {
+		if (!connected) {
+			return;
+		}
+		switch(view.getId()) {
+		case R.id.record:
+			if (writer == null) {
+				writer = new EcgDataWriter(app);
+				((ImageView) view).setImageResource(R.drawable.ic_action_stop);
+			} else {
+				writer.close();
+				writer = null;
+				((ImageView) view).setImageResource(R.drawable.ic_action_upload);
 			}
 			break;
-		case R.id.action_pause:
+		case R.id.freeze:
 			if (paused) {
 				paused = false;
-				item.setIcon(getResources().getDrawable(android.R.drawable.ic_media_pause));
+				((ImageView) view).setImageResource(R.drawable.ic_action_pause);
 			} else {
 				paused = true;
-				item.setIcon(getResources().getDrawable(android.R.drawable.ic_media_play));
+				((ImageView) view).setImageResource(R.drawable.ic_action_play);
 				if (writer != null) {
 					writer.close();
 					writer = null;
-					item.setTitle(getResources().getString(R.string.action_record));
 				}
 			}
 			break;
+		case R.id.mute:
+			if (player == null) {
+				((ImageView) view).setImageResource(R.drawable.ic_action_mute);
+				player = new  AudioTrack(AudioManager.STREAM_MUSIC,
+						Config.AUDIO_PLAYBACK_RATE,
+						AudioFormat.CHANNEL_OUT_MONO,
+						AudioFormat.ENCODING_PCM_8BIT,
+						Config.GRAPH_LENGTH * Config.AUDIO_BYTES_PER_SAMPLE,
+						AudioTrack.MODE_STREAM);
+				player.play();
+			} else {
+				((ImageView) view).setImageResource(R.drawable.ic_action_audio);
+				player.release();
+				player = null;
+			}
+			break;
 		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	private void startScan() {
@@ -183,6 +178,7 @@ public class MainActivity extends Activity implements ConnectionListener {
 				.setScanMode(ScanSettings.SCAN_MODE_BALANCED).setReportDelay(0).build();
 		scanner.startScan(null, settings, callback);
 		findViewById(R.id.progress).setVisibility(View.VISIBLE);
+		findViewById(R.id.status).setVisibility(View.INVISIBLE);
 	}
 
 	private ScanCallback callback = new ScanCallback() {
@@ -214,45 +210,22 @@ public class MainActivity extends Activity implements ConnectionListener {
 			scanner.stopScan(callback);
 		}
 		findViewById(R.id.progress).setVisibility(View.INVISIBLE);
+		findViewById(R.id.status).setVisibility(View.VISIBLE);
 	}
 
 	@Override
 	public void onConnect(String address) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				((CheckBox) findViewById(R.id.connected)).setChecked(true);
-			}
-		});
+		connected = true;
+		((ImageView) findViewById(R.id.status)).setImageResource(R.drawable.ic_connected);
+		((TextView) findViewById(R.id.label_status)).setText(R.string.connected);
 		Log.i(TAG, String.format("Connected to %s", address));
-		staleTimer = new Timer();
-		staleTimer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						long seconds = (System.currentTimeMillis() - lastUpdateTime) / 1000;
-						TextView secondsView = (TextView) findViewById(R.id.seconds);
-						if (secondsView != null) {
-							secondsView.setText(Long.toString(seconds));
-						}
-					}
-				});
-			}
-		}, 0, 1000);
 	}
 
 	@Override
 	public void onDisconnect(String address) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				((CheckBox) findViewById(R.id.connected)).setChecked(false);
-			}
-		});
-		staleTimer.cancel();
-		staleTimer = null;
+		connected = false;
+		((ImageView) findViewById(R.id.status)).setImageResource(R.drawable.ic_warning);
+		((TextView) findViewById(R.id.label_status)).setText(R.string.connecting);
 		Log.i(TAG, String.format("Disconnected from %s", address));
 		patchClient = null;
 	}
@@ -290,19 +263,9 @@ public class MainActivity extends Activity implements ConnectionListener {
 		signals.update(data);
 		if (audioBufferLength == Config.GRAPH_LENGTH) {
 			audioBufferLength = 0;
-			new AsyncTask<Void, Void, Void>() {
-				@Override
-				protected Void doInBackground(Void... params) {
-					try {
-						byte audio[] = getBytes(signals.getFeaturePoints(FeaturePoint.Type.QRS));
-						player.write(audio, 0, audio.length);
-					} catch (Throwable t) {
-						Log.e(TAG, t.getCause() != null
-								? t.getCause().getMessage() : t.getMessage(), t);
-					}
-					return null;
-				}
-			}.execute();
+			if (player != null) {
+				playAudio();
+			}
 		}
 
 		runOnUiThread(new Runnable() {
@@ -338,5 +301,21 @@ public class MainActivity extends Activity implements ConnectionListener {
 			}
 		}
 		return bytes;
+	}
+
+	private void playAudio() {
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground(Void... params) {
+				try {
+					byte audio[] = getBytes(signals.getFeaturePoints(FeaturePoint.Type.QRS));
+					player.write(audio, 0, audio.length);
+				} catch (Throwable t) {
+					Log.e(TAG, t.getCause() != null
+							? t.getCause().getMessage() : t.getMessage(), t);
+				}
+				return null;
+			}
+		}.execute();
 	}
 }
