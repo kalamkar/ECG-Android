@@ -117,6 +117,17 @@
                 android:src="@drawable/ic_connected"
                 android:visibility="invisible" />
 
+            <TextView
+                android:id="@+id/seconds"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/record"
+                android:layout_alignLeft="@+id/record"
+                android:layout_alignRight="@+id/record"
+                android:layout_alignTop="@+id/record"
+                android:gravity="center"
+                android:textColor="@android:color/white" />
+
         </RelativeLayout>
 
         <fragment

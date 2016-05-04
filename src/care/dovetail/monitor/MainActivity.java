@@ -1,6 +1,8 @@
 package care.dovetail.monitor;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -50,6 +52,9 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 	private boolean connected = false;
 	private boolean paused = false;
 	private EcgDataWriter writer = null;
+
+	private Timer recordingTimer = null;
+	private long recordingStartTime = 0;
 
 	private final int data[] = new int[Config.GRAPH_LENGTH];
 
@@ -150,11 +155,29 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 				writer = new EcgDataWriter(app);
 				((ImageView) view).setImageResource(R.drawable.ic_action_stop);
 				((TextView) findViewById(R.id.label_record)).setText(R.string.recording);
+				recordingStartTime = System.currentTimeMillis();
+				recordingTimer = new Timer();
+				recordingTimer.schedule(new TimerTask() {
+					@Override
+					public void run() {
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								long seconds =
+										(System.currentTimeMillis() - recordingStartTime) / 1000;
+								((TextView) findViewById(R.id.seconds)).setText(
+										Long.toString(seconds));
+							}
+						});
+					}
+				}, 0, 1000);
 			} else {
 				writer.close();
 				writer = null;
+				recordingTimer.cancel();
 				((ImageView) view).setImageResource(R.drawable.ic_action_record);
 				((TextView) findViewById(R.id.label_record)).setText(R.string.record);
+				((TextView) findViewById(R.id.seconds)).setText("");
 			}
 			break;
 		case R.id.freeze:
