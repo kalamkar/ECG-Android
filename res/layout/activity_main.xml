@@ -56,32 +56,6 @@
                 android:src="@drawable/ic_action_pause"
                 android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/label_status"
-                style="@style/IconTip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:text="@string/connecting" />
-
-            <ProgressBar
-                android:id="@+id/progress"
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_above="@+id/label_status"
-                android:layout_centerHorizontal="true" />
-
-            <ImageView
-                android:id="@+id/status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/progress"
-                android:layout_centerHorizontal="true"
-                android:src="@drawable/ic_connected"
-                android:visibility="invisible" />
-
             <LinearLayout
                 android:id="@+id/heart"
                 android:layout_width="wrap_content"
@@ -116,6 +90,32 @@
                     android:text="@string/tap_to_listen"
                     android:textSize="10sp" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/label_status"
+                style="@style/IconTip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:text="@string/connecting" />
+
+            <ProgressBar
+                android:id="@+id/progress"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/label_status"
+                android:layout_alignParentRight="true" />
+
+            <ImageView
+                android:id="@+id/status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/label_status"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/ic_connected"
+                android:visibility="invisible" />
 
         </RelativeLayout>
 

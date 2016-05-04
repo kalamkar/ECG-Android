@@ -149,10 +149,12 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 			if (writer == null) {
 				writer = new EcgDataWriter(app);
 				((ImageView) view).setImageResource(R.drawable.ic_action_stop);
+				((TextView) findViewById(R.id.label_record)).setText(R.string.recording);
 			} else {
 				writer.close();
 				writer = null;
-				((ImageView) view).setImageResource(R.drawable.ic_action_upload);
+				((ImageView) view).setImageResource(R.drawable.ic_action_record);
+				((TextView) findViewById(R.id.label_record)).setText(R.string.record);
 			}
 			break;
 		case R.id.freeze:

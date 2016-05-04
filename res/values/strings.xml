@@ -14,6 +14,7 @@
     
     <string name="freeze">freeze</string>
     <string name="record">record</string>
+    <string name="recording">recording</string>
     
     <string name="tap_to_listen">Tap to listen</string>
     <string name="tap_to_mute">Tap to mute</string>
