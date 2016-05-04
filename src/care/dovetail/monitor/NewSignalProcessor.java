@@ -12,7 +12,7 @@ public class NewSignalProcessor {
 
 	private static final int WINDOW_SIZE = 120 / Config.SAMPLE_INTERVAL_MS; // 120ms max QRS time
 	private static final int MIN_QRS_HEIGHT = 50;
-	private static final int MIN_NUM_INTERVALS_FOR_BPM = 5;
+	private static final int MIN_NUM_INTERVALS_FOR_BPM = 3;
 	private static final float QRS_AMPLITUDE_TOLERANCE = 0.3f;  // 30% tolerance
 
 	private final int windowSize = WINDOW_SIZE;

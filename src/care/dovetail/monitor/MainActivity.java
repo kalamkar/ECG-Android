@@ -11,6 +11,7 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -60,7 +61,17 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.i(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+
+		if (getIntent().hasExtra(DemoActivity.DEMO_FLAG)) {
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
+					| ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+					| ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+			setContentView(R.layout.activity_main_demo);
+		} else {
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR |
+					ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+			setContentView(R.layout.activity_main);
+		}
 
 		app = (App) getApplication();
 
