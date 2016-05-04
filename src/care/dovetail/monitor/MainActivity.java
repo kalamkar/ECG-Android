@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,15 +64,15 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 		super.onCreate(savedInstanceState);
 
 		if (getIntent().hasExtra(DemoActivity.DEMO_FLAG)) {
-			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
-					| ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-					| ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 			setContentView(R.layout.activity_main_demo);
 		} else {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR |
 					ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			setContentView(R.layout.activity_main);
 		}
+
+		this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		app = (App) getApplication();
 
