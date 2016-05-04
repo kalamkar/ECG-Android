@@ -305,7 +305,8 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 				// fragment.updateLongGraph(peaks);
 				fragment.updateMarkers(peaks, signals.medianAmplitude);
 
-				((TextView) findViewById(R.id.bpm)).setText(Integer.toString(signals.bpm));
+				((TextView) findViewById(R.id.bpm)).setText(
+						signals.bpm == 0 ? "?" : Integer.toString(signals.bpm));
 			}
 		});
 	}
