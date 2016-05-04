@@ -95,7 +95,7 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 
 		findViewById(R.id.record).setOnClickListener(this);
 		findViewById(R.id.freeze).setOnClickListener(this);
-		findViewById(R.id.mute).setOnClickListener(this);
+		findViewById(R.id.heart).setOnClickListener(this);
 	}
 
 	@Override
@@ -168,9 +168,9 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 				}
 			}
 			break;
-		case R.id.mute:
+		case R.id.heart:
 			if (player == null) {
-				((ImageView) view).setImageResource(R.drawable.ic_action_mute);
+				((TextView) findViewById(R.id.tap_to_listen)).setText(R.string.tap_to_mute);
 				player = new  AudioTrack(AudioManager.STREAM_MUSIC,
 						Config.AUDIO_PLAYBACK_RATE,
 						AudioFormat.CHANNEL_OUT_MONO,
@@ -179,7 +179,7 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 						AudioTrack.MODE_STREAM);
 				player.play();
 			} else {
-				((ImageView) view).setImageResource(R.drawable.ic_action_audio);
+				((TextView) findViewById(R.id.tap_to_listen)).setText(R.string.tap_to_listen);
 				player.release();
 				player = null;
 			}

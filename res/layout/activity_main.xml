@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="care.dovetail.monitor.SettingsActivity" >
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -21,48 +21,13 @@
             android:paddingTop="@dimen/activity_vertical_margin" >
 
             <TextView
-                android:id="@+id/bpm"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="\?"
-                android:textColor="@color/primary_dark"
-                android:textSize="50sp" />
-
-            <TextView
-                android:id="@+id/textView1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/bpm"
-                android:layout_alignLeft="@+id/bpm"
-                android:text="@string/bpm"
-                style="@style/IconTip" />
-            
-            <TextView
-                android:id="@+id/label_mute"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:text="@string/sound"
-                style="@style/IconTip" />
-
-            <ImageView
-                android:id="@+id/mute"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_above="@+id/label_mute"
-                android:layout_alignRight="@+id/label_mute"
-                android:src="@drawable/ic_action_audio" />
-
-            <TextView
                 android:id="@+id/label_record"
+                style="@style/IconTip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true"
-                android:text="@string/record"
-                style="@style/IconTip" />
+                android:text="@string/record" />
 
             <ImageView
                 android:id="@+id/record"
@@ -117,14 +82,49 @@
                 android:src="@drawable/ic_connected"
                 android:visibility="invisible" />
 
+            <LinearLayout
+                android:id="@+id/heart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="@drawable/ic_heart" >
+
+                <TextView
+                    android:id="@+id/bpm"
+                    android:layout_width="@dimen/heartbeat_width"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="\?"
+                    android:textColor="@color/primary_dark"
+                    android:textSize="50sp" />
+
+                <TextView
+                    android:id="@+id/textView1"
+                    style="@style/IconTip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bpm" />
+                
+                <TextView
+                    android:id="@+id/tap_to_listen"
+                    style="@style/IconTip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tap_to_listen"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
         </RelativeLayout>
-        
+
         <fragment
             android:id="@+id/chart"
+            android:name="care.dovetail.monitor.ChartFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:name="care.dovetail.monitor.ChartFragment"/>
+            android:layout_weight="1" />
     </LinearLayout>
 
 </FrameLayout>
