@@ -58,6 +58,7 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.i(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
@@ -86,28 +87,30 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 	}
 
 	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		String address = savedInstanceState.getString(BTLE_ADDRESS, null);
-		if (address != null) {
-			patchClient = new BluetoothSmartClient(this, this, address);
-		}
-		super.onRestoreInstanceState(savedInstanceState);
-	}
-
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		outState.putString(BTLE_ADDRESS, patchClient != null ? patchClient.getDevice() : null);
-		super.onSaveInstanceState(outState);
-	}
-
-	@Override
     protected void onStart() {
+		Log.i(TAG, "onStart");
         super.onStart();
+        // TODO(abhi): Create patchClient in onActivityResult if BT enable activity started.
+     	patchClient = new BluetoothSmartClient(this, this);
         startScan();
     }
 
+//	@Override
+//	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//		Log.i(TAG, "onRestoreInstanceState");
+//		patchClient.connect(savedInstanceState.getString(BTLE_ADDRESS, null));
+//	}
+//
+//	@Override
+//	protected void onSaveInstanceState(Bundle outState) {
+//		Log.i(TAG, "onSaveInstanceState");
+//		outState.putString(BTLE_ADDRESS, patchClient.getDevice());
+//		super.onSaveInstanceState(outState);
+//	}
+
     @Override
     protected void onStop() {
+    	Log.i(TAG, "onStop");
     	stopScan();
     	if (patchClient != null) {
     		// patchClient.disableNotifications();
@@ -198,8 +201,7 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 			if (name != null && name.startsWith(Config.BT_DEVICE_NAME_PREFIX)) {
 				stopScan();
 				Log.i(TAG, String.format("Found device %s", name));
-				patchClient = new BluetoothSmartClient(MainActivity.this, MainActivity.this,
-						result.getDevice().getAddress());
+				patchClient.connect(result.getDevice().getAddress());
 			}
 			super.onScanResult(callbackType, result);
 		}
@@ -231,7 +233,6 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 	public void onDisconnect(String address) {
 		connected = false;
 		Log.i(TAG, String.format("Disconnected from %s", address));
-		patchClient = null;
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {

@@ -18,6 +18,7 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 	private static final String TAG = "BluetoothSmartClient";
 
 	private final ConnectionListener listener;
+	private final Context context;
 
 	private final BluetoothAdapter adapter;
 
@@ -33,19 +34,25 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
     	public void onNewValues(int values[]);
     }
 
-	public BluetoothSmartClient(Context context, ConnectionListener listener, String address) {
+	public BluetoothSmartClient(Context context, ConnectionListener listener) {
 		this.listener = listener;
+		this.context = context;
+
 		BluetoothManager bluetoothManager =
 				(BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
 		adapter = bluetoothManager.getAdapter();
+	}
 
+	public void connect(String address) {
 		if (address == null || address.isEmpty()) {
 			Log.e(TAG, "No BluetoothLE device given to connect.");
 			return;
 		}
-		if (adapter != null && adapter.isEnabled()) {
-			adapter.getRemoteDevice(address).connectGatt(context, false /* auto connect */, this);
+		if (adapter == null || !adapter.isEnabled()) {
+			Log.e(TAG, "Bluetooth adapther is null or disabled.");
+			return;
 		}
+		adapter.getRemoteDevice(address).connectGatt(context, false /* auto connect */, this);
 	}
 
 	@Override
