@@ -16,7 +16,7 @@ public class Config {
 	public static final int AUDIO_BYTES_PER_SAMPLE =
 			AUDIO_PLAYBACK_RATE / (1000 / SAMPLE_INTERVAL_MS);
 
-	public static final int GRAPH_LENGTH = 2000;
+	public static final int GRAPH_LENGTH = 1000;
 
 	public static final int SHORT_GRAPH_MIN = 0; 	//  64 for V2,  64 for V1
 	public static final int SHORT_GRAPH_MAX = 275; 	// 192 for V2, 255 for V1
@@ -24,7 +24,7 @@ public class Config {
 	public static final int LONG_GRAPH_MIN = 100;		// 100 for V2, 100 for V1
 	public static final int LONG_GRAPH_MAX = 255;		// 192 for V2, 255 for V1
 
-	public static final int GRAPH_UPDATE_MILLIS = 200;
+	public static final int GRAPH_UPDATE_MILLIS = 100;
 	public static final int GRAPH_UPDATE_COUNT = (100 * GRAPH_UPDATE_MILLIS) / GRAPH_LENGTH;
 
 	public static final SimpleDateFormat EVENT_TIME_FORMAT =

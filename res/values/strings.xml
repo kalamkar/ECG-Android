@@ -14,8 +14,10 @@
     <string name="freeze">freeze</string>
     <string name="record">record</string>
     <string name="sound">sound</string>
+    
     <string name="connected">connected</string>
-    <string name="connecting">connecting</string>
+    <string name="disconnected">disconnected</string>
+    <string name="connecting">searching</string>
     
     <string name="ble_not_supported">Bluetooth LE not supported.</string>
 

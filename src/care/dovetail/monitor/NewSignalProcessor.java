@@ -166,8 +166,9 @@ public class NewSignalProcessor {
 		}
 		Arrays.sort(intervals);
 		int medianInterval = intervals[intervals.length / 2];
-		bpm = 60000 / (medianInterval * Config.SAMPLE_INTERVAL_MS);
-
+		if (medianInterval != 0) {
+			bpm = 60000 / (medianInterval * Config.SAMPLE_INTERVAL_MS);
+		}
 	}
 
 	private void removeQrsOutliers() {

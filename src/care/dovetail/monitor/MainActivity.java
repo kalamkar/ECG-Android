@@ -179,6 +179,7 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 		scanner.startScan(null, settings, callback);
 		findViewById(R.id.progress).setVisibility(View.VISIBLE);
 		findViewById(R.id.status).setVisibility(View.INVISIBLE);
+		((TextView) findViewById(R.id.label_status)).setText(R.string.connecting);
 	}
 
 	private ScanCallback callback = new ScanCallback() {
@@ -216,27 +217,35 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 	@Override
 	public void onConnect(String address) {
 		connected = true;
-		((ImageView) findViewById(R.id.status)).setImageResource(R.drawable.ic_connected);
-		((TextView) findViewById(R.id.label_status)).setText(R.string.connected);
 		Log.i(TAG, String.format("Connected to %s", address));
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				((ImageView) findViewById(R.id.status)).setImageResource(R.drawable.ic_connected);
+				((TextView) findViewById(R.id.label_status)).setText(R.string.connected);
+			}
+		});
 	}
 
 	@Override
 	public void onDisconnect(String address) {
 		connected = false;
-		((ImageView) findViewById(R.id.status)).setImageResource(R.drawable.ic_warning);
-		((TextView) findViewById(R.id.label_status)).setText(R.string.connecting);
 		Log.i(TAG, String.format("Disconnected from %s", address));
 		patchClient = null;
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				((ImageView) findViewById(R.id.status)).setImageResource(R.drawable.ic_warning);
+				((TextView) findViewById(R.id.label_status)).setText(R.string.disconnected);
+			}
+		});
 	}
 
 	@Override
 	public void onServiceDiscovered(boolean success) {
-		if (success) {
+		if (success && patchClient != null) {
 			Log.i(TAG, "Notification service discoverd, enabling notifications");
 			patchClient.enableNotifications();
-		} else {
-			Log.e(TAG, "Notification service not found.");
 		}
 	}
 
