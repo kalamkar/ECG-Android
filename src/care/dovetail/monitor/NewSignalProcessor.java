@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import android.util.Pair;
-import care.dovetail.monitor.NewSignalProcessor.FeaturePoint.Type;
+import care.dovetail.monitor.NewSignalProcessor.Feature.Type;
 
 public class NewSignalProcessor {
 	private static final String TAG = "NewSignalProcessor";
@@ -18,18 +18,15 @@ public class NewSignalProcessor {
 	private final int windowSize = WINDOW_SIZE;
 	private final int minQrsHeight = MIN_QRS_HEIGHT;
 
-	private final List<FeaturePoint> features = new ArrayList<FeaturePoint>();
+	private final List<Feature> features = new ArrayList<Feature>();
 
-	private int values[];
+	private int updateCount = 0;
+	private final int values[] = new int[Config.GRAPH_LENGTH];
 
-	public int minAmplitude;
 	public int medianAmplitude;
-	public int maxAmplitude;
-	public int signalDurationMillis;
-
 	public int bpm;
 
-	public static class FeaturePoint {
+	public static class Feature {
 		public enum Type {
 			QRS
 		}
@@ -45,7 +42,7 @@ public class NewSignalProcessor {
 		public int max;
 		public int height;
 
-		public FeaturePoint(Type type, int start, int end, int[] data) {
+		public Feature(Type type, int start, int end, int[] data) {
 			this.type = type;
 			this.start = start;
 			this.end = end;
@@ -56,42 +53,52 @@ public class NewSignalProcessor {
 
 		@Override
 		public boolean equals(Object other) {
-			if (other == null || !(other instanceof FeaturePoint)) {
+			if (other == null || !(other instanceof Feature)) {
 				return false;
 			}
-			FeaturePoint otherPt = (FeaturePoint) other;
+			Feature otherPt = (Feature) other;
 			return type == otherPt.type && start == otherPt.start && end == otherPt.end;
 		}
 	}
 
-	public void update(int[] values) {
-		features.clear();
-		resetStats();
-
-		if (values == null || values.length == 0) {
+	public void update(int[] chunk) {
+		updateCount++;
+		System.arraycopy(values, chunk.length, values, 0, values.length - chunk.length);
+		System.arraycopy(chunk, 0, values, values.length - chunk.length, chunk.length);
+		if (updateCount < Config.GRAPH_UPDATE_COUNT) {
 			return;
 		}
-		this.values = values;
-		findFeaturePoints();
+		updateCount = 0;
+		processFeatures();
+	}
+
+	private synchronized void processFeatures() {
+		features.clear();
+		resetStats();
+		findFeatures();
 		updateStats();
 		removeQrsOutliers();
 		calculateBpm();
 	}
 
-	public List<FeaturePoint> getFeaturePoints(Type type) {
-		List<FeaturePoint> points = new ArrayList<FeaturePoint>();
-		for (FeaturePoint fp : features) {
+	public synchronized List<Feature> getFeatures(Type type) {
+		List<Feature> subset = new ArrayList<Feature>();
+		for (Feature fp : features) {
 			if (type != null && type.equals(fp.type)) {
-				points.add(fp);
+				subset.add(fp);
 			}
 		}
-		return points;
+		return subset;
 	}
 
-	private void findFeaturePoints() {
-		FeaturePoint lastAddedQrs = null;
+	public int[] getValues() {
+		return values;
+	}
+
+	private void findFeatures() {
+		Feature lastAddedQrs = null;
 		for (int i = 0; i < values.length - windowSize; i++) {
-			FeaturePoint qrs = getQrs(i, i + windowSize);
+			Feature qrs = getQrs(i, i + windowSize);
 			if (qrs == null) {
 				continue;
 			}
@@ -109,7 +116,7 @@ public class NewSignalProcessor {
 		}
 	}
 
-	private FeaturePoint getQrs(int windowStart, int windowEnd) {
+	private Feature getQrs(int windowStart, int windowEnd) {
 		Pair<Integer, Integer> min = Pair.create(windowStart, values[windowStart]);
 		Pair<Integer, Integer> max = Pair.create(windowStart, values[windowStart]);
 		for (int i = windowStart; i < windowEnd; i++) {
@@ -121,7 +128,7 @@ public class NewSignalProcessor {
 			}
 		}
 		if (Math.abs(max.second - min.second) > minQrsHeight) {
-			FeaturePoint feature = new FeaturePoint(FeaturePoint.Type.QRS, windowStart, windowEnd,
+			Feature feature = new Feature(Feature.Type.QRS, windowStart, windowEnd,
 					Arrays.copyOfRange(values, windowStart, windowEnd));
 			feature.min = min.second;
 			feature.max = max.second;
@@ -133,21 +140,17 @@ public class NewSignalProcessor {
 
 	private void resetStats() {
 		medianAmplitude = 0;
-		signalDurationMillis = 0;
 		bpm = 0;
 	}
 
 	private void updateStats() {
 		int copyOfValues[] = values.clone();
 		Arrays.sort(copyOfValues);
-		minAmplitude = copyOfValues[0];
 		medianAmplitude = copyOfValues[copyOfValues.length / 2];
-		maxAmplitude = copyOfValues[copyOfValues.length -1];
-		signalDurationMillis =  values.length * Config.SAMPLE_INTERVAL_MS;
 	}
 
 	private void calculateBpm() {
-		List<FeaturePoint> qrss = getFeaturePoints(FeaturePoint.Type.QRS);
+		List<Feature> qrss = getFeatures(Feature.Type.QRS);
 		if (qrss.size() < 2) {
 			return;
 		}
@@ -172,10 +175,10 @@ public class NewSignalProcessor {
 	}
 
 	private void removeQrsOutliers() {
-		List<FeaturePoint> qrss = getFeaturePoints(FeaturePoint.Type.QRS);
+		List<Feature> qrss = getFeatures(Feature.Type.QRS);
 		if (qrss.size() > 2) {
 			int median = getMedianQrsHeight(qrss);
-			for (FeaturePoint qrs : qrss) {
+			for (Feature qrs : qrss) {
 				if (qrs.height < median - (median * QRS_AMPLITUDE_TOLERANCE)
 						|| qrs.height > median + (median * QRS_AMPLITUDE_TOLERANCE)) {
 					features.remove(qrs);
@@ -184,7 +187,7 @@ public class NewSignalProcessor {
 		}
 	}
 
-	private int getMedianQrsHeight(List<FeaturePoint> qrs) {
+	private int getMedianQrsHeight(List<Feature> qrs) {
 		int heights[] = new int[features.size()];
 		for (int i = 0; i < qrs.size(); i++) {
 			heights[i] = qrs.get(i).height;

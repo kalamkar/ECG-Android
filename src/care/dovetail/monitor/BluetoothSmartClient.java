@@ -1,6 +1,5 @@
 package care.dovetail.monitor;
 
-import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
@@ -9,38 +8,81 @@ import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
-import android.os.Build;
 import android.util.Log;
+import android.widget.Toast;
 
-@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class BluetoothSmartClient extends BluetoothGattCallback {
 	private static final String TAG = "BluetoothSmartClient";
 
-	private final ConnectionListener listener;
+	private final BluetoothDeviceListener listener;
 	private final Context context;
 
 	private final BluetoothAdapter adapter;
+	private final BluetoothLeScanner scanner;
 
 	private BluetoothGatt gatt;
 	private BluetoothGattCharacteristic sensorData;
 
 	private int state = BluetoothProfile.STATE_DISCONNECTED;
 
-    public interface ConnectionListener {
+    public interface BluetoothDeviceListener {
+    	public void onScanStart();
+    	public void onScanResult(String deviceAddress);
+    	public void onScanEnd();
     	public void onConnect(String address);
     	public void onDisconnect(String address);
     	public void onServiceDiscovered(boolean success);
     	public void onNewValues(int values[]);
     }
 
-	public BluetoothSmartClient(Context context, ConnectionListener listener) {
+	public BluetoothSmartClient(Context context, BluetoothDeviceListener listener) {
 		this.listener = listener;
 		this.context = context;
 
 		BluetoothManager bluetoothManager =
 				(BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
 		adapter = bluetoothManager.getAdapter();
+		scanner = adapter.getBluetoothLeScanner();
+	}
+
+	private ScanCallback callback = new ScanCallback() {
+		@Override
+		public void onScanFailed(int errorCode) {
+			Toast.makeText(context,
+					String.format("Bluetooth LE scan failed with error %d", errorCode),
+					Toast.LENGTH_LONG).show();
+			super.onScanFailed(errorCode);
+		}
+
+		@Override
+		public void onScanResult(int callbackType, ScanResult result) {
+			String name = result.getDevice().getName();
+			name = name == null ? result.getScanRecord().getDeviceName() : name;
+			if (name != null && name.startsWith(Config.BT_DEVICE_NAME_PREFIX)) {
+				Log.i(TAG, String.format("Found device %s", name));
+				listener.onScanResult(result.getDevice().getAddress());
+			}
+			super.onScanResult(callbackType, result);
+		}
+	};
+
+	public void startScan() {
+		Log.i(TAG, "Starting scan for BTLE patch.");
+		ScanSettings settings = new ScanSettings.Builder()
+				.setScanMode(ScanSettings.SCAN_MODE_BALANCED).setReportDelay(0).build();
+		scanner.startScan(null, settings, callback);
+		listener.onScanStart();
+	}
+
+	public void stopScan() {
+		Log.i(TAG, "Stopping scan for BTLE patch.");
+		scanner.stopScan(callback);
+		listener.onScanEnd();
 	}
 
 	public void connect(String address) {

@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import care.dovetail.monitor.ChartView.Chart;
-import care.dovetail.monitor.NewSignalProcessor.FeaturePoint;
+import care.dovetail.monitor.NewSignalProcessor.Feature;
 
 public class ChartFragment extends Fragment {
 	private static final String TAG = "ChartFragment";
@@ -65,16 +65,16 @@ public class ChartFragment extends Fragment {
 		ecg.setData(points);
 	}
 
-	public void updateLongGraph(List<FeaturePoint> breaths) {
+	public void updateLongGraph(List<Feature> breaths) {
 		List<Pair<Integer, Integer>> points = new ArrayList<Pair<Integer, Integer>>(breaths.size());
 		for (int i = 0; i < breaths.size(); i++) {
-			FeaturePoint breath = breaths.get(i);
+			Feature breath = breaths.get(i);
 			points.add(Pair.create(breath.index, breath.max));
 		}
 		breath.setData(points);
 	}
 
-	public void updateMarkers(List<FeaturePoint> peaks, int medianAmplitude) {
+	public void updateMarkers(List<Feature> peaks, int medianAmplitude) {
 		List<Pair<Integer, Integer>> medianPoints = new ArrayList<Pair<Integer, Integer>>(2);
 		medianPoints.add(Pair.create(0, medianAmplitude));
 		medianPoints.add(Pair.create(Config.GRAPH_LENGTH - 1, medianAmplitude));
@@ -82,7 +82,7 @@ public class ChartFragment extends Fragment {
 
 		List<Pair<Integer, Integer>> peakPoints = new ArrayList<Pair<Integer, Integer>>();
 		for (int i = 0; i < peaks.size(); i++) {
-			FeaturePoint peak = peaks.get(i);
+			Feature peak = peaks.get(i);
 			peakPoints.add(Pair.create(peak.index, peak.min));
 			peakPoints.add(Pair.create(peak.index, peak.max));
 		}
