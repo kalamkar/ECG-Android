@@ -139,7 +139,11 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 		switch(view.getId()) {
 		case R.id.record:
 			if (writer == null) {
-				new PositionFragment(app.peekRecordingTags()).show(getFragmentManager(), null);
+				String positionTag = app.peekRecordingTags();
+				if (getIntent().hasExtra(DemoActivity.DEMO_FLAG)) {
+					positionTag = ((TextView) findViewById(R.id.tags)).getText().toString();
+				}
+				new PositionFragment(positionTag).show(getFragmentManager(), null);
 			} else {
 				stopRecording();
 			}
@@ -332,7 +336,11 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 	}
 
 	public void startRecording() {
-		writer = new EcgDataWriter(app, app.nextRecordingTags());
+		startRecording(app.nextRecordingTags());
+	}
+
+	public void startRecording(String positionTag) {
+		writer = new EcgDataWriter(app, positionTag);
 		((ImageView) findViewById(R.id.record)).setImageResource(R.drawable.ic_action_stop);
 		((TextView) findViewById(R.id.label_record)).setText(R.string.recording);
 		recordingStartTime = System.currentTimeMillis();

@@ -44,7 +44,13 @@ public class PositionFragment extends DialogFragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		((ImageView) view.findViewById(R.id.image)).setImageResource(pictures.get(position));
+		Integer positionPicture = pictures.get(position);
+		if (positionPicture == null) {
+			((MainActivity) getActivity()).startRecording(position);
+			dismiss();
+			return;
+		}
+		((ImageView) view.findViewById(R.id.image)).setImageResource(positionPicture);
 		view.findViewById(R.id.start).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {

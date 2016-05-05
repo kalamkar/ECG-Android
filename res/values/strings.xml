@@ -26,5 +26,7 @@
     <string name="connecting">searching</string>
     
     <string name="ble_not_supported">Bluetooth LE not supported.</string>
+    
+    <string name="recording_tags">recording tags</string>
 
 </resources>

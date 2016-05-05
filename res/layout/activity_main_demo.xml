@@ -68,14 +68,6 @@
             android:layout_above="@+id/label_record"
             android:layout_alignLeft="@+id/label_record"
             android:src="@drawable/ic_action_record" />
-        
-        <ImageView
-                android:id="@+id/status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:src="@drawable/ic_warning" />
 
         <TextView
             android:id="@+id/label_freeze"
@@ -93,15 +85,6 @@
             android:layout_above="@+id/label_freeze"
             android:layout_centerHorizontal="true"
             android:src="@drawable/ic_action_pause" />
-
-        <TextView
-            android:id="@+id/label_status"
-            style="@style/IconTip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_below="@+id/status"
-            android:text="@string/connecting" />
         
         <TextView
             android:id="@+id/seconds"
@@ -113,6 +96,35 @@
             android:layout_alignTop="@+id/record"
             android:gravity="center"
             android:textColor="@android:color/white" />
+
+        <TextView
+            android:id="@+id/label_status"
+            style="@style/IconTip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:text="@string/connecting" />
+
+        <ImageView
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/label_status"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/ic_warning" />
+
+        <EditText
+            android:id="@+id/tags"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:ems="10"
+            android:hint="@string/recording_tags" >
+
+            <requestFocus />
+        </EditText>
 
     </RelativeLayout>
    
