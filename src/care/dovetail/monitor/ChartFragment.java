@@ -11,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import care.dovetail.monitor.ChartView.Chart;
-import care.dovetail.monitor.NewSignalProcessor.Feature;
+import care.dovetail.monitor.SignalProcessor.Feature;
 
 public class ChartFragment extends Fragment {
 	private static final String TAG = "ChartFragment";

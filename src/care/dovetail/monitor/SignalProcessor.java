@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import android.util.Pair;
-import care.dovetail.monitor.NewSignalProcessor.Feature.Type;
+import care.dovetail.monitor.SignalProcessor.Feature.Type;
 
-public class NewSignalProcessor {
+public class SignalProcessor {
 	private static final String TAG = "NewSignalProcessor";
 
 	private static final int WINDOW_SIZE = 120 / Config.SAMPLE_INTERVAL_MS; // 120ms max QRS time

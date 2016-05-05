@@ -23,7 +23,7 @@ import biz.source_code.dsp.filter.FilterPassType;
 import biz.source_code.dsp.filter.IirFilter;
 import biz.source_code.dsp.filter.IirFilterDesignFisher;
 import care.dovetail.monitor.BluetoothSmartClient.BluetoothDeviceListener;
-import care.dovetail.monitor.NewSignalProcessor.Feature;
+import care.dovetail.monitor.SignalProcessor.Feature;
 
 public class MainActivity extends Activity implements BluetoothDeviceListener, OnClickListener {
 	private static final String TAG = "MainActivity";
@@ -33,7 +33,7 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 	private BluetoothSmartClient patchClient;
 
 	private IirFilter filter;
-	private final NewSignalProcessor signals = new NewSignalProcessor();
+	private final SignalProcessor signals = new SignalProcessor();
 
 	private boolean connected = false;
 	private boolean paused = false;

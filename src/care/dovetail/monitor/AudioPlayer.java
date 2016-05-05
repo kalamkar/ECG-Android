@@ -7,7 +7,7 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.AsyncTask;
 import android.util.Log;
-import care.dovetail.monitor.NewSignalProcessor.Feature;
+import care.dovetail.monitor.SignalProcessor.Feature;
 
 public class AudioPlayer extends AudioTrack {
 	private static final String TAG = "AudioPlayer";
@@ -21,7 +21,7 @@ public class AudioPlayer extends AudioTrack {
 				AudioTrack.MODE_STREAM);
 	}
 
-	public void write(final NewSignalProcessor signals) {
+	public void write(final SignalProcessor signals) {
 		new AsyncTask<Void, Void, Void>() {
 			@Override
 			protected Void doInBackground(Void... params) {
