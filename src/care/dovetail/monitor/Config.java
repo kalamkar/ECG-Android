@@ -29,4 +29,7 @@ public class Config {
 
 	public static final SimpleDateFormat EVENT_TIME_FORMAT =
 			new SimpleDateFormat("hh:mm:ssaa, MMM dd yyyy", Locale.US);
+
+	public static final String POSITION_TAGS =
+			"top,right,bottom,left,top_far,right_far,bottom_far,left_far";
 }

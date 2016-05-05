@@ -65,4 +65,15 @@ public class Utils {
 
 		return Pair.create(responseCode, response.toString());
 	}
+
+	public static String join(String delimiter, String[] tokens) {
+		if (tokens == null) {
+			return null;
+		}
+		StringBuilder builder = new StringBuilder();
+		for (String token : tokens) {
+			builder.append(token).append(delimiter);
+		}
+		return builder.toString().replaceFirst(String.format("%s$", delimiter), "");
+	}
 }

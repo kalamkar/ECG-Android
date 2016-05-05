@@ -152,32 +152,9 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 		switch(view.getId()) {
 		case R.id.record:
 			if (writer == null) {
-				writer = new EcgDataWriter(app);
-				((ImageView) view).setImageResource(R.drawable.ic_action_stop);
-				((TextView) findViewById(R.id.label_record)).setText(R.string.recording);
-				recordingStartTime = System.currentTimeMillis();
-				recordingTimer = new Timer();
-				recordingTimer.schedule(new TimerTask() {
-					@Override
-					public void run() {
-						runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								long seconds =
-										(System.currentTimeMillis() - recordingStartTime) / 1000;
-								((TextView) findViewById(R.id.seconds)).setText(
-										Long.toString(seconds));
-							}
-						});
-					}
-				}, 0, 1000);
+				startRecording(app.nextRecordingTags());
 			} else {
-				writer.close();
-				writer = null;
-				recordingTimer.cancel();
-				((ImageView) view).setImageResource(R.drawable.ic_action_record);
-				((TextView) findViewById(R.id.label_record)).setText(R.string.record);
-				((TextView) findViewById(R.id.seconds)).setText("");
+				stopRecording();
 			}
 			break;
 		case R.id.freeze:
@@ -365,5 +342,36 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 				return null;
 			}
 		}.execute();
+	}
+
+	private void startRecording(String positionTags) {
+		writer = new EcgDataWriter(app, positionTags);
+		((ImageView) findViewById(R.id.record)).setImageResource(R.drawable.ic_action_stop);
+		((TextView) findViewById(R.id.label_record)).setText(R.string.recording);
+		recordingStartTime = System.currentTimeMillis();
+		recordingTimer = new Timer();
+		recordingTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						long seconds =
+								(System.currentTimeMillis() - recordingStartTime) / 1000;
+						((TextView) findViewById(R.id.seconds)).setText(
+								Long.toString(seconds));
+					}
+				});
+			}
+		}, 0, 1000);
+	}
+
+	private void stopRecording() {
+		writer.close();
+		writer = null;
+		recordingTimer.cancel();
+		((ImageView) findViewById(R.id.record)).setImageResource(R.drawable.ic_action_record);
+		((TextView) findViewById(R.id.label_record)).setText(R.string.record);
+		((TextView) findViewById(R.id.seconds)).setText("");
 	}
 }

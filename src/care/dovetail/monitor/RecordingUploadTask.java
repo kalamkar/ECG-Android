@@ -25,7 +25,8 @@ public class RecordingUploadTask extends AsyncTask<Void, Void, Integer> {
 			byte data[] = readFileData(filename);
 			String appName = app.getResources().getString(R.string.app_name);
 			String tags = String.format("%s,%s,%s,%s",
-					new File(filename).getName().replace(appName + "-", "").replace(".raw", ""),
+					new File(filename).getName()
+						.replace(appName + "-", "").replace(".raw", "").replace('_', ','),
 					Build.MANUFACTURER,
 					Build.MODEL,
 					String.format("%dHz", 1000 / Config.SAMPLE_INTERVAL_MS));

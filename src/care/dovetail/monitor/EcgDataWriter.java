@@ -24,12 +24,12 @@ public class EcgDataWriter {
     private File file;
     private BufferedOutputStream output;
 
-	public EcgDataWriter(App app) {
+	public EcgDataWriter(App app, String fileTags) {
 		this.app = app;
-		file = new File(
-				Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-				app.getResources().getString(R.string.app_name) + "-" +
-				FILE_NAME_FORMAT.format(new Date()) + ".raw");
+		File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+		file = new File(dir,
+				String.format("%s-%s_%s.raw", app.getResources().getString(R.string.app_name),
+				FILE_NAME_FORMAT.format(new Date()), fileTags));
         try {
         	file.createNewFile();
         	output = new BufferedOutputStream(new FileOutputStream(file));
