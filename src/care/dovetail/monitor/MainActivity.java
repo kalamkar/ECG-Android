@@ -112,19 +112,6 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
         startScan();
     }
 
-//	@Override
-//	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-//		Log.i(TAG, "onRestoreInstanceState");
-//		patchClient.connect(savedInstanceState.getString(BTLE_ADDRESS, null));
-//	}
-//
-//	@Override
-//	protected void onSaveInstanceState(Bundle outState) {
-//		Log.i(TAG, "onSaveInstanceState");
-//		outState.putString(BTLE_ADDRESS, patchClient.getDevice());
-//		super.onSaveInstanceState(outState);
-//	}
-
     @Override
     protected void onStop() {
     	Log.i(TAG, "onStop");
@@ -152,7 +139,7 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 		switch(view.getId()) {
 		case R.id.record:
 			if (writer == null) {
-				startRecording(app.nextRecordingTags());
+				new PositionFragment(app.peekRecordingTags()).show(getFragmentManager(), null);
 			} else {
 				stopRecording();
 			}
@@ -344,8 +331,8 @@ public class MainActivity extends Activity implements ConnectionListener, OnClic
 		}.execute();
 	}
 
-	private void startRecording(String positionTags) {
-		writer = new EcgDataWriter(app, positionTags);
+	public void startRecording() {
+		writer = new EcgDataWriter(app, app.nextRecordingTags());
 		((ImageView) findViewById(R.id.record)).setImageResource(R.drawable.ic_action_stop);
 		((TextView) findViewById(R.id.label_record)).setText(R.string.recording);
 		recordingStartTime = System.currentTimeMillis();

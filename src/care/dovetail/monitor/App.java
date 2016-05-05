@@ -80,6 +80,10 @@ public class App extends Application {
 		return positions[0];
 	}
 
+	public String peekRecordingTags() {
+		return recordingPositions.split(",")[0];
+	}
+
 	private void saveStringPreference(final String prefName, final String prefValue) {
 		final Editor editor = getSharedPreferences(
 				getPackageName(), Application.MODE_PRIVATE).edit();
