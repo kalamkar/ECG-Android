@@ -27,8 +27,10 @@ public class SignalProcessor {
 	private int updateCount = 0;
 	private final int values[] = new int[Config.GRAPH_LENGTH];
 
+
+	private final List<Integer> bpm = new ArrayList<Integer>();
+
 	public int medianAmplitude;
-	public int bpm;
 
 	private IirFilter filter;
 
@@ -74,18 +76,18 @@ public class SignalProcessor {
 
 	public void update(int[] chunk) {
 		updateCount++;
+
 		System.arraycopy(values, chunk.length, values, 0, values.length - chunk.length);
 		System.arraycopy(chunk, 0, values, values.length - chunk.length, chunk.length);
-		if (updateCount < Config.GRAPH_UPDATE_COUNT) {
-			return;
+
+		if (updateCount == Config.FEATURE_DETECT_INTERVAL) {
+			updateCount = 0;
+			processFeatures();
 		}
-		updateCount = 0;
-		processFeatures();
 	}
 
 	private synchronized void processFeatures() {
 		features.clear();
-		resetStats();
 		findFeatures();
 		updateStats();
 		removeQrsOutliers();
@@ -104,6 +106,15 @@ public class SignalProcessor {
 
 	public int[] getValues() {
 		return values;
+	}
+
+	public synchronized int getBpm() {
+		Integer bpms[] = bpm.toArray(new Integer[0]);
+		if (bpms.length == 0) {
+			return 0;
+		}
+		Arrays.sort(bpms);
+		return bpms[bpms.length / 2];
 	}
 
 	private void findFeatures() {
@@ -149,19 +160,15 @@ public class SignalProcessor {
 		return null;
 	}
 
-	private void resetStats() {
-		medianAmplitude = 0;
-		bpm = 0;
-	}
-
 	private void updateStats() {
 		int copyOfValues[] = values.clone();
 		Arrays.sort(copyOfValues);
 		medianAmplitude = copyOfValues[copyOfValues.length / 2];
 	}
 
-	private void calculateBpm() {
+	private synchronized void calculateBpm() {
 		List<Feature> qrss = getFeatures(Feature.Type.QRS);
+		// With only 1 QRS we cannot calculate RR interval
 		if (qrss.size() < 2) {
 			return;
 		}
@@ -181,7 +188,10 @@ public class SignalProcessor {
 		Arrays.sort(intervals);
 		int medianInterval = intervals[intervals.length / 2];
 		if (medianInterval != 0) {
-			bpm = 60000 / (medianInterval * Config.SAMPLE_INTERVAL_MS);
+			bpm.add(60000 / (medianInterval * Config.SAMPLE_INTERVAL_MS));
+			if (bpm.size() > 10) {
+				bpm.remove(0);
+			}
 		}
 	}
 

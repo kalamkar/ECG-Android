@@ -24,8 +24,10 @@ public class Config {
 	public static final int LONG_GRAPH_MIN = 100;		// 100 for V2, 100 for V1
 	public static final int LONG_GRAPH_MAX = 255;		// 192 for V2, 255 for V1
 
-	public static final int GRAPH_UPDATE_MILLIS = 200;
-	public static final int GRAPH_UPDATE_COUNT = (100 * GRAPH_UPDATE_MILLIS) / GRAPH_LENGTH;
+	public static final int GRAPH_UPDATE_MILLIS = 500;
+
+	// Detect features every 10 chunk updates (and not every update)
+	public static final int FEATURE_DETECT_INTERVAL = 10;
 
 	public static final int BPM_UPDATE_MILLIS = 3000;
 

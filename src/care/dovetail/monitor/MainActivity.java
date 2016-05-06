@@ -232,8 +232,8 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 	private final Runnable bpmUpdater = new Runnable() {
 		@Override
 		public void run() {
-			((TextView) findViewById(R.id.bpm)).setText(
-					signals.bpm == 0 ? "?" : Integer.toString(signals.bpm));
+			int bpm = signals.getBpm();
+			((TextView) findViewById(R.id.bpm)).setText(bpm == 0 ? "?" : Integer.toString(bpm));
 		}
 	};
 
