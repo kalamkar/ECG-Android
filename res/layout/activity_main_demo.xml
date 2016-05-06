@@ -52,27 +52,12 @@
                     android:textSize="10sp" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/record"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:text="@string/record"
-            android:drawableTop="@drawable/ic_action_record"
-            style="@style/IconTip" />
-        
-        <TextView
-            android:id="@+id/seconds"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/record"
-            android:layout_alignRight="@+id/record"
-            android:layout_alignTop="@+id/record"
-            android:padding="5dp"
-            android:gravity="center"
-            android:textColor="@android:color/white"
-            android:textSize="15sp" />
+        <FrameLayout
+                android:id="@+id/recorder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true" />
 
         <TextView
             android:id="@+id/status"
@@ -84,16 +69,6 @@
             android:text="@string/connecting"
             android:drawableTop="@drawable/ic_warning" />
 
-        <EditText
-            android:id="@+id/tags"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:ems="10"
-            android:textSize="10dp"
-            android:hint="@string/recording_tags" />
-
         <ToggleButton
             android:id="@+id/pause"
             android:layout_width="wrap_content"
@@ -104,16 +79,6 @@
             android:textOff="@string/action_pause"
             android:textOn="@string/action_resume" />
         
-        <TextView
-            android:id="@+id/recordingIndex"
-            style="@style/IconTip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_toRightOf="@+id/record"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:visibility="gone" />
-
     </RelativeLayout>
    
     <ProgressBar

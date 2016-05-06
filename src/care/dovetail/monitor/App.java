@@ -14,9 +14,11 @@ public class App extends Application {
 
 	private static final String UPLOAD_QUEUE = "UPLOAD_QUEUE";
 	private static final String RECORDING_POSITIONS = "RECORDING_POSITIONS";
+	private static final String USER_TAGS = "USER_TAGS";
 
 	private final Set<String> uploadQueue = new HashSet<String>();
 	private String recordingPositions;
+	private String userTags;
 
 	@Override
 	public void onCreate() {
@@ -28,6 +30,8 @@ public class App extends Application {
 		uploadRecordings();
 
 		recordingPositions = prefs.getString(RECORDING_POSITIONS, Config.POSITION_TAGS);
+
+		userTags = prefs.getString(USER_TAGS, "");
 	}
 
 	public void removeFromUploadQueue(final String filename) {
@@ -88,6 +92,15 @@ public class App extends Application {
 		int total = Config.POSITION_TAGS.split(",").length;
 		int remaining = recordingPositions.split(",").length;
 		return String.format("%d/%d", (total - remaining) + 1, total);
+	}
+
+	public void setUserTags(String tags) {
+		userTags = tags;
+		saveStringPreference(USER_TAGS, tags);
+	}
+
+	public String getUserTags() {
+		return userTags;
 	}
 
 	private void saveStringPreference(final String prefName, final String prefValue) {

@@ -26,15 +26,14 @@ import care.dovetail.monitor.SignalProcessor.Feature;
 public class MainActivity extends Activity implements BluetoothDeviceListener, OnClickListener {
 	private static final String TAG = "MainActivity";
 
-	private App app;
-
 	private BluetoothSmartClient patchClient;
 	private final SignalProcessor signals = new SignalProcessor();
 
-	private EcgDataWriter writer = null;
-
 	private int audioBufferLength = 0;
 	private AudioPlayer player;
+
+	private RecordingFragment recorder;
+	private ChartFragment chartFragment;
 
 	private Timer chartUpdateTimer = null;
 	private Timer bpmUpdateTimer = null;
@@ -42,7 +41,6 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		app = (App) getApplication();
 
 		if (getIntent().hasExtra(DemoActivity.DEMO_FLAG)) {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -68,20 +66,19 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 		    Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_LONG).show();
 		}
 
-		findViewById(R.id.record).setOnClickListener(this);
 		findViewById(R.id.heart).setOnClickListener(this);
 
 		((ToggleButton) findViewById(R.id.pause)).setOnCheckedChangeListener(
 				new OnCheckedChangeListener() {
 					@Override
 					public void onCheckedChanged(CompoundButton button, boolean isChecked) {
-						if (isChecked) {
-							stopRecording();
+						if (isChecked && recorder != null) {
+							recorder.stopRecording();
 						}
 					}
 		});
 
-		((TextView) findViewById(R.id.recordingIndex)).setText(app.getRecordingIndex());
+		chartFragment = (ChartFragment) getFragmentManager().findFragmentById(R.id.chart);
 	}
 
 	@Override
@@ -100,7 +97,6 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
     		patchClient.disconnect();
     		patchClient = null;
     	}
-    	stopRecording();
 		if (player != null) {
 			player.release();
 		}
@@ -119,17 +115,6 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 			return;
 		}
 		switch(view.getId()) {
-		case R.id.record:
-			if (writer == null) {
-				String positionTag = ((App) getApplication()).peekRecordingTags();
-				if (getIntent().hasExtra(DemoActivity.DEMO_FLAG)) {
-					positionTag = ((TextView) findViewById(R.id.tags)).getText().toString();
-				}
-				new PositionFragment(positionTag).show(getFragmentManager(), null);
-			} else {
-				stopRecording();
-			}
-			break;
 		case R.id.heart:
 			if (player == null) {
 				((TextView) findViewById(R.id.tap_to_listen)).setText(R.string.tap_to_mute);
@@ -168,9 +153,15 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
+				if (MainActivity.this.isDestroyed()) {
+					return;
+				}
 				TextView status = (TextView) findViewById(R.id.status);
 				status.setText(R.string.connected);
 				status.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_connected, 0, 0);
+
+				recorder = new RecordingFragment();
+				getFragmentManager().beginTransaction().add(R.id.recorder, recorder).commit();
 			}
 		});
 
@@ -197,9 +188,14 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
+				if (MainActivity.this.isDestroyed()) {
+					return;
+				}
 				TextView status = (TextView) findViewById(R.id.status);
 				status.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_warning, 0, 0);
 				status.setText(R.string.disconnected);
+				getFragmentManager().beginTransaction().remove(recorder).commit();
+				recorder = null;
 			}
 		});
 		chartUpdateTimer.cancel();
@@ -209,7 +205,6 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 	@Override
 	public void onServiceDiscovered(boolean success) {
 		if (success && patchClient != null) {
-			Log.i(TAG, "Notification service discoverd, enabling notifications");
 			patchClient.enableNotifications();
 		}
 	}
@@ -217,16 +212,15 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 	private final Runnable chartUpdater = new Runnable() {
 		@Override
 		public void run() {
-			ChartFragment fragment =
-					(ChartFragment) getFragmentManager().findFragmentById(R.id.chart);
-			if (fragment == null || ((ToggleButton) findViewById(R.id.pause)).isChecked()) {
+			if (MainActivity.this.isDestroyed() || chartFragment == null
+					|| ((ToggleButton) findViewById(R.id.pause)).isChecked()) {
 				return;
 			}
 
-			fragment.clear();
-			fragment.updateGraph(signals.getValues());
-			// fragment.updateLongGraph(peaks);
-			fragment.updateMarkers(
+			chartFragment.clear();
+			chartFragment.updateGraph(signals.getValues());
+			// chartFragment.updateLongGraph(peaks);
+			chartFragment.updateMarkers(
 					signals.getFeatures(Feature.Type.QRS), signals.medianAmplitude);
 		}
 	};
@@ -242,9 +236,8 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 	@Override
 	public void onNewValues(int chunk[]) {
 		signals.update(chunk);
-
-		if (writer != null) {
-			writer.write(chunk);
+		if (recorder != null) {
+			recorder.record(chunk);
 		}
 
 		audioBufferLength += chunk.length;
@@ -254,38 +247,5 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 				player.write(signals);
 			}
 		}
-	}
-
-	public void startRecording() {
-		startRecording(app.nextRecordingTags());
-	}
-
-	public void startRecording(String positionTag) {
-		writer = new EcgDataWriter(this, positionTag);
-		TextView record = (TextView) findViewById(R.id.record);
-		record.setText(R.string.recording);
-		record.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_action_stop, 0, 0);
-	}
-
-	private void stopRecording() {
-		if (writer == null) {
-			return;
-		}
-		writer.close();
-		writer = null;
-		TextView record = (TextView) findViewById(R.id.record);
-		record.setText(R.string.record);
-		record.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_action_record, 0, 0);
-		((TextView) findViewById(R.id.seconds)).setText("");
-		((TextView) findViewById(R.id.recordingIndex)).setText(app.getRecordingIndex());
-	}
-
-	public void onRecordingUpdate(final long durationSeconds) {
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				((TextView) findViewById(R.id.seconds)).setText(Long.toString(durationSeconds));
-			}
-		});
 	}
 }

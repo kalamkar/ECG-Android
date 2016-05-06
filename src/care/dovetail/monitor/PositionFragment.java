@@ -27,10 +27,14 @@ public class PositionFragment extends DialogFragment {
 		pictures.put("left_far", R.drawable.belly_left_far);
 	}
 
-	private final String position;
+	private final RecordingFragment recorder;
+	private final String positionTags;
+	private final String userTags;
 
-	public PositionFragment(String position) {
-		this.position = position;
+	public PositionFragment(RecordingFragment recorder, String positionTags, String userTags) {
+		this.recorder = recorder;
+		this.positionTags = positionTags;
+		this.userTags = userTags;
 	}
 
 	@Override
@@ -44,9 +48,9 @@ public class PositionFragment extends DialogFragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		Integer positionPicture = pictures.get(position);
+		Integer positionPicture = pictures.get(positionTags);
 		if (positionPicture == null) {
-			((MainActivity) getActivity()).startRecording(position);
+			recorder.startRecording(userTags);
 			dismiss();
 			return;
 		}
@@ -54,7 +58,9 @@ public class PositionFragment extends DialogFragment {
 		view.findViewById(R.id.start).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				((MainActivity) getActivity()).startRecording();
+				// Burn the tags
+				((App) getActivity().getApplication()).nextRecordingTags();
+				recorder.startRecording(positionTags + "," + userTags);
 				dismiss();
 			}
 		});

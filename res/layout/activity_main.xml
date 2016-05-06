@@ -20,15 +20,12 @@
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin" >
 
-            <TextView
-                android:id="@+id/record"
-                style="@style/IconTip"
+            <FrameLayout
+                android:id="@+id/recorder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:drawableTop="@drawable/ic_action_record"
-                android:text="@string/record" />
+                android:layout_alignParentLeft="true" />
 
             <ToggleButton
                 android:id="@+id/pause"
@@ -85,27 +82,6 @@
                 android:layout_alignParentRight="true"
                 android:text="@string/connecting"
                 android:drawableTop="@drawable/ic_warning" />
-
-            <TextView
-                android:id="@+id/seconds"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignLeft="@+id/record"
-                android:layout_alignRight="@+id/record"
-                android:layout_alignTop="@+id/record"
-                android:padding="5dp"
-                android:gravity="center"
-                android:textColor="@android:color/white"
-                android:textSize="15sp" />
-
-            <TextView
-                android:id="@+id/recordingIndex"
-                style="@style/IconTip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_toRightOf="@+id/record"
-                android:layout_marginLeft="@dimen/small_margin" />
 
             <ProgressBar
                 android:id="@+id/progress"
