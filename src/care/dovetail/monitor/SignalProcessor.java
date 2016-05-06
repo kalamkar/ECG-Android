@@ -110,7 +110,7 @@ public class SignalProcessor {
 
 	public synchronized int getBpm() {
 		Integer bpms[] = bpm.toArray(new Integer[0]);
-		if (bpms.length == 0) {
+		if (bpms.length < Config.MIN_BPM_SAMPLES) {
 			return 0;
 		}
 		Arrays.sort(bpms);
@@ -189,7 +189,7 @@ public class SignalProcessor {
 		int medianInterval = intervals[intervals.length / 2];
 		if (medianInterval != 0) {
 			bpm.add(60000 / (medianInterval * Config.SAMPLE_INTERVAL_MS));
-			if (bpm.size() > 10) {
+			if (bpm.size() > Config.MAX_BPM_SAMPLES) {
 				bpm.remove(0);
 			}
 		}

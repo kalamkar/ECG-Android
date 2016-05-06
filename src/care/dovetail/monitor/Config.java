@@ -30,6 +30,8 @@ public class Config {
 	public static final int FEATURE_DETECT_INTERVAL = 10;
 
 	public static final int BPM_UPDATE_MILLIS = 3000;
+	public static final int MIN_BPM_SAMPLES = 5;
+	public static final int MAX_BPM_SAMPLES = 10;
 
 	public static final SimpleDateFormat EVENT_TIME_FORMAT =
 			new SimpleDateFormat("hh:mm:ssaa, MMM dd yyyy", Locale.US);
