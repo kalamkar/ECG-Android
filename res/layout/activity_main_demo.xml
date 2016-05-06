@@ -53,49 +53,36 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/label_record"
+            android:id="@+id/record"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:text="@string/record"
+            android:drawableTop="@drawable/ic_action_record"
             style="@style/IconTip" />
-
-        <ImageView
-            android:id="@+id/record"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/label_record"
-            android:layout_alignLeft="@+id/label_record"
-            android:src="@drawable/ic_action_record" />
         
         <TextView
             android:id="@+id/seconds"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/record"
             android:layout_alignLeft="@+id/record"
             android:layout_alignRight="@+id/record"
             android:layout_alignTop="@+id/record"
+            android:padding="5dp"
             android:gravity="center"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:textSize="15sp" />
 
         <TextView
-            android:id="@+id/label_status"
+            android:id="@+id/status"
             style="@style/IconTip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
-            android:text="@string/connecting" />
-
-        <ImageView
-            android:id="@+id/status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/label_status"
-            android:layout_alignParentRight="true"
-            android:src="@drawable/ic_warning" />
+            android:text="@string/connecting"
+            android:drawableTop="@drawable/ic_warning" />
 
         <EditText
             android:id="@+id/tags"

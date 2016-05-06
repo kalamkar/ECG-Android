@@ -17,7 +17,6 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -42,7 +41,6 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		Log.i(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		app = (App) getApplication();
 
@@ -88,7 +86,6 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 
 	@Override
     protected void onStart() {
-		Log.i(TAG, "onStart");
         super.onStart();
         // TODO(abhi): Create patchClient in onActivityResult if BT enable activity started.
      	patchClient = new BluetoothSmartClient(this, this);
@@ -97,7 +94,6 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 
     @Override
     protected void onStop() {
-    	Log.i(TAG, "onStop");
     	if (patchClient != null) {
     		patchClient.stopScan();
     		// patchClient.disableNotifications();
@@ -151,8 +147,7 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 	@Override
 	public void onScanStart() {
 		findViewById(R.id.progress).setVisibility(View.VISIBLE);
-		findViewById(R.id.status).setVisibility(View.INVISIBLE);
-		((TextView) findViewById(R.id.label_status)).setText(R.string.connecting);
+		((TextView) findViewById(R.id.status)).setText(R.string.connecting);
 	}
 
 	@Override
@@ -173,8 +168,9 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				((ImageView) findViewById(R.id.status)).setImageResource(R.drawable.ic_connected);
-				((TextView) findViewById(R.id.label_status)).setText(R.string.connected);
+				TextView status = (TextView) findViewById(R.id.status);
+				status.setText(R.string.connected);
+				status.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_connected, 0, 0);
 			}
 		});
 
@@ -201,8 +197,9 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				((ImageView) findViewById(R.id.status)).setImageResource(R.drawable.ic_warning);
-				((TextView) findViewById(R.id.label_status)).setText(R.string.disconnected);
+				TextView status = (TextView) findViewById(R.id.status);
+				status.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_warning, 0, 0);
+				status.setText(R.string.disconnected);
 			}
 		});
 		chartUpdateTimer.cancel();
@@ -265,8 +262,9 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 
 	public void startRecording(String positionTag) {
 		writer = new EcgDataWriter(this, positionTag);
-		((ImageView) findViewById(R.id.record)).setImageResource(R.drawable.ic_action_stop);
-		((TextView) findViewById(R.id.label_record)).setText(R.string.recording);
+		TextView record = (TextView) findViewById(R.id.record);
+		record.setText(R.string.recording);
+		record.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_action_stop, 0, 0);
 	}
 
 	private void stopRecording() {
@@ -275,8 +273,9 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 		}
 		writer.close();
 		writer = null;
-		((ImageView) findViewById(R.id.record)).setImageResource(R.drawable.ic_action_record);
-		((TextView) findViewById(R.id.label_record)).setText(R.string.record);
+		TextView record = (TextView) findViewById(R.id.record);
+		record.setText(R.string.record);
+		record.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_action_record, 0, 0);
 		((TextView) findViewById(R.id.seconds)).setText("");
 		((TextView) findViewById(R.id.recordingIndex)).setText(app.getRecordingIndex());
 	}
