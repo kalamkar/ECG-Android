@@ -26,13 +26,13 @@ public class SignalProcessor {
 
 	private int updateCount = 0;
 	private final int values[] = new int[Config.GRAPH_LENGTH];
-
+	private final int breathValues[] = new int[Config.GRAPH_LENGTH];
 
 	private final List<Integer> bpm = new ArrayList<Integer>();
 
 	public int medianAmplitude;
 
-	private IirFilter filter;
+	private IirFilter breathFilter;
 
 	public static class Feature {
 		public enum Type {
@@ -70,8 +70,9 @@ public class SignalProcessor {
 	}
 
 	public SignalProcessor() {
-		filter = new IirFilter(IirFilterDesignFisher.design(
-				FilterPassType.lowpass, FilterCharacteristicsType.bessel, 4, 0, 0.1, 0));
+		// Lowpass 30bpm. frequency values relative to sampling rate. 0.0025 = 0.5Hz / 200Hz
+		breathFilter = new IirFilter(IirFilterDesignFisher.design(
+				FilterPassType.lowpass, FilterCharacteristicsType.bessel, 4, 0, 0.0025, 0));
 	}
 
 	public void update(int[] chunk) {
@@ -80,18 +81,18 @@ public class SignalProcessor {
 		System.arraycopy(values, chunk.length, values, 0, values.length - chunk.length);
 		System.arraycopy(chunk, 0, values, values.length - chunk.length, chunk.length);
 
+
+		// Pass through a lowpass filter of 30bpm to get breath data
+		for (int i = 0; i < chunk.length; i++) {
+			chunk[i] = (int) breathFilter.step(chunk[i]);
+		}
+		System.arraycopy(breathValues, chunk.length, breathValues, 0, breathValues.length - chunk.length);
+		System.arraycopy(chunk, 0, breathValues, breathValues.length - chunk.length, chunk.length);
+
 		if (updateCount == Config.FEATURE_DETECT_INTERVAL) {
 			updateCount = 0;
 			processFeatures();
 		}
-	}
-
-	private synchronized void processFeatures() {
-		features.clear();
-		findFeatures();
-		updateStats();
-		removeQrsOutliers();
-		calculateBpm();
 	}
 
 	public synchronized List<Feature> getFeatures(Type type) {
@@ -108,6 +109,10 @@ public class SignalProcessor {
 		return values;
 	}
 
+	public int[] getBreathValues() {
+		return breathValues;
+	}
+
 	public synchronized int getBpm() {
 		Integer bpms[] = bpm.toArray(new Integer[0]);
 		if (bpms.length < Config.MIN_BPM_SAMPLES) {
@@ -115,6 +120,14 @@ public class SignalProcessor {
 		}
 		Arrays.sort(bpms);
 		return bpms[bpms.length / 2];
+	}
+
+	private synchronized void processFeatures() {
+		features.clear();
+		findFeatures();
+		updateStats();
+		removeQrsOutliers();
+		calculateBpm();
 	}
 
 	private void findFeatures() {
@@ -166,7 +179,7 @@ public class SignalProcessor {
 		medianAmplitude = copyOfValues[copyOfValues.length / 2];
 	}
 
-	private synchronized void calculateBpm() {
+	private void calculateBpm() {
 		List<Feature> qrss = getFeatures(Feature.Type.QRS);
 		// With only 1 QRS we cannot calculate RR interval
 		if (qrss.size() < 2) {

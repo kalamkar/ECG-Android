@@ -214,7 +214,7 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 
 			chartFragment.clear();
 			chartFragment.updateGraph(signals.getValues());
-			// chartFragment.updateLongGraph(peaks);
+			// chartFragment.updateLongGraph(signals.getBreathValues());
 			chartFragment.updateMarkers(
 					signals.getFeatures(Feature.Type.QRS), signals.medianAmplitude);
 		}

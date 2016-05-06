@@ -16,13 +16,13 @@ public class Config {
 	public static final int AUDIO_BYTES_PER_SAMPLE =
 			AUDIO_PLAYBACK_RATE / (1000 / SAMPLE_INTERVAL_MS);
 
-	public static final int GRAPH_LENGTH = 1000;	// 5 seconds at 200Hz
+	public static final int GRAPH_LENGTH = 1000;		// 5 seconds at 200Hz
 
 	public static final int SHORT_GRAPH_MIN = 0; 	//  64 for V2,  64 for V1
 	public static final int SHORT_GRAPH_MAX = 275; 	// 192 for V2, 255 for V1
 
-	public static final int LONG_GRAPH_MIN = 100;		// 100 for V2, 100 for V1
-	public static final int LONG_GRAPH_MAX = 255;		// 192 for V2, 255 for V1
+	public static final int LONG_GRAPH_MIN = 0;		// 100 for V2, 100 for V1
+	public static final int LONG_GRAPH_MAX = 255;	// 192 for V2, 255 for V1
 
 	public static final int GRAPH_UPDATE_MILLIS = 500;
 

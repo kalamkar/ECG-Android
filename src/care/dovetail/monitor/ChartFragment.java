@@ -47,7 +47,7 @@ public class ChartFragment extends Fragment {
 
 		ChartView breathView = ((ChartView) getView().findViewById(R.id.breath));
 		breath = breathView.makePointsChart(
-					getResources().getColor(android.R.color.holo_green_light), 5);
+					getResources().getColor(android.R.color.holo_green_light), 1);
 		breath.setXRange(0, Config.GRAPH_LENGTH);
 		breath.setYRange(Config.LONG_GRAPH_MIN, Config.LONG_GRAPH_MAX);
 	}
@@ -65,11 +65,10 @@ public class ChartFragment extends Fragment {
 		ecg.setData(points);
 	}
 
-	public void updateLongGraph(List<Feature> breaths) {
-		List<Pair<Integer, Integer>> points = new ArrayList<Pair<Integer, Integer>>(breaths.size());
-		for (int i = 0; i < breaths.size(); i++) {
-			Feature breath = breaths.get(i);
-			points.add(Pair.create(breath.index, breath.max));
+	public void updateLongGraph(int data[]) {
+		List<Pair<Integer, Integer>> points = new ArrayList<Pair<Integer, Integer>>(data.length);
+		for (int i = 0; i < data.length; i++) {
+			points.add(Pair.create(i, data[i]));
 		}
 		breath.setData(points);
 	}
