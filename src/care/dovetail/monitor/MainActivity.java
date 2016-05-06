@@ -15,28 +15,21 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import biz.source_code.dsp.filter.FilterCharacteristicsType;
-import biz.source_code.dsp.filter.FilterPassType;
-import biz.source_code.dsp.filter.IirFilter;
-import biz.source_code.dsp.filter.IirFilterDesignFisher;
+import android.widget.ToggleButton;
 import care.dovetail.monitor.BluetoothSmartClient.BluetoothDeviceListener;
 import care.dovetail.monitor.SignalProcessor.Feature;
 
 public class MainActivity extends Activity implements BluetoothDeviceListener, OnClickListener {
 	private static final String TAG = "MainActivity";
 
-	private App app;
-
 	private BluetoothSmartClient patchClient;
-
-	private IirFilter filter;
 	private final SignalProcessor signals = new SignalProcessor();
 
-	private boolean connected = false;
-	private boolean paused = false;
 	private EcgDataWriter writer = null;
 
 	private int audioBufferLength = 0;
@@ -61,8 +54,6 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 
 		this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-		app = (App) getApplication();
-
 		BluetoothManager bluetoothManager =
 				(BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 		BluetoothAdapter bluetooth = bluetoothManager.getAdapter();
@@ -72,16 +63,22 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 			startActivityForResult(enableBtIntent, 0);
 		}
 
-		filter = new IirFilter(IirFilterDesignFisher.design(
-				FilterPassType.lowpass, FilterCharacteristicsType.bessel, 4, 0, 0.1, 0));
-
 		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
 		    Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_LONG).show();
 		}
 
 		findViewById(R.id.record).setOnClickListener(this);
-		findViewById(R.id.freeze).setOnClickListener(this);
 		findViewById(R.id.heart).setOnClickListener(this);
+
+		((ToggleButton) findViewById(R.id.pause)).setOnCheckedChangeListener(
+				new OnCheckedChangeListener() {
+					@Override
+					public void onCheckedChanged(CompoundButton button, boolean isChecked) {
+						if (isChecked) {
+							stopRecording();
+						}
+					}
+		});
 	}
 
 	@Override
@@ -102,10 +99,7 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
     		patchClient.disconnect();
     		patchClient = null;
     	}
-		if (writer != null) {
-			writer.close();
-			writer = null;
-		}
+    	stopRecording();
 		if (player != null) {
 			player.release();
 		}
@@ -120,32 +114,19 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 
 	@Override
 	public void onClick(View view) {
-		if (!connected) {
+		if (patchClient == null || !patchClient.isConnected()) {
 			return;
 		}
 		switch(view.getId()) {
 		case R.id.record:
 			if (writer == null) {
-				String positionTag = app.peekRecordingTags();
+				String positionTag = ((App) getApplication()).peekRecordingTags();
 				if (getIntent().hasExtra(DemoActivity.DEMO_FLAG)) {
 					positionTag = ((TextView) findViewById(R.id.tags)).getText().toString();
 				}
 				new PositionFragment(positionTag).show(getFragmentManager(), null);
 			} else {
 				stopRecording();
-			}
-			break;
-		case R.id.freeze:
-			if (paused) {
-				paused = false;
-				((ImageView) view).setImageResource(R.drawable.ic_action_pause);
-			} else {
-				paused = true;
-				((ImageView) view).setImageResource(R.drawable.ic_action_play);
-				if (writer != null) {
-					writer.close();
-					writer = null;
-				}
 			}
 			break;
 		case R.id.heart:
@@ -183,7 +164,6 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 
 	@Override
 	public void onConnect(String address) {
-		connected = true;
 		Log.i(TAG, String.format("Connected to %s", address));
 		runOnUiThread(new Runnable() {
 			@Override
@@ -212,7 +192,6 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 
 	@Override
 	public void onDisconnect(String address) {
-		connected = false;
 		Log.i(TAG, String.format("Disconnected from %s", address));
 		runOnUiThread(new Runnable() {
 			@Override
@@ -238,7 +217,7 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 		public void run() {
 			ChartFragment fragment =
 					(ChartFragment) getFragmentManager().findFragmentById(R.id.chart);
-			if (paused || fragment == null) {
+			if (fragment == null || ((ToggleButton) findViewById(R.id.pause)).isChecked()) {
 				return;
 			}
 
@@ -276,7 +255,7 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 	}
 
 	public void startRecording() {
-		startRecording(app.nextRecordingTags());
+		startRecording(((App) getApplication()).nextRecordingTags());
 	}
 
 	public void startRecording(String positionTag) {
@@ -286,6 +265,9 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 	}
 
 	private void stopRecording() {
+		if (writer == null) {
+			return;
+		}
 		writer.close();
 		writer = null;
 		((ImageView) findViewById(R.id.record)).setImageResource(R.drawable.ic_action_record);

@@ -37,23 +37,15 @@
                 android:layout_alignLeft="@+id/label_record"
                 android:src="@drawable/ic_action_record" />
 
-            <TextView
-                android:id="@+id/label_freeze"
-                style="@style/IconTip"
+            <ToggleButton
+                android:id="@+id/pause"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:text="@string/freeze"
-                android:visibility="gone" />
-
-            <ImageView
-                android:id="@+id/freeze"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_above="@+id/label_freeze"
-                android:layout_centerHorizontal="true"
-                android:src="@drawable/ic_action_pause"
+                android:text="ToggleButton"
+                android:textOff="@string/action_pause"
+                android:textOn="@string/action_resume"
                 android:visibility="gone" />
 
             <LinearLayout

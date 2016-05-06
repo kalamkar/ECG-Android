@@ -5,6 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import android.util.Pair;
+import biz.source_code.dsp.filter.FilterCharacteristicsType;
+import biz.source_code.dsp.filter.FilterPassType;
+import biz.source_code.dsp.filter.IirFilter;
+import biz.source_code.dsp.filter.IirFilterDesignFisher;
 import care.dovetail.monitor.SignalProcessor.Feature.Type;
 
 public class SignalProcessor {
@@ -25,6 +29,8 @@ public class SignalProcessor {
 
 	public int medianAmplitude;
 	public int bpm;
+
+	private IirFilter filter;
 
 	public static class Feature {
 		public enum Type {
@@ -59,6 +65,11 @@ public class SignalProcessor {
 			Feature otherPt = (Feature) other;
 			return type == otherPt.type && start == otherPt.start && end == otherPt.end;
 		}
+	}
+
+	public SignalProcessor() {
+		filter = new IirFilter(IirFilterDesignFisher.design(
+				FilterPassType.lowpass, FilterCharacteristicsType.bessel, 4, 0, 0.1, 0));
 	}
 
 	public void update(int[] chunk) {
