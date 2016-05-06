@@ -120,6 +120,15 @@
                 android:gravity="center"
                 android:textColor="@android:color/white" />
 
+            <TextView
+                android:id="@+id/recordingIndex"
+                style="@style/IconTip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@+id/label_record"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin" />
+
         </RelativeLayout>
 
         <fragment

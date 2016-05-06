@@ -84,6 +84,12 @@ public class App extends Application {
 		return recordingPositions.split(",")[0];
 	}
 
+	public String getRecordingIndex() {
+		int total = Config.POSITION_TAGS.split(",").length;
+		int remaining = recordingPositions.split(",").length;
+		return String.format("%d/%d", (total - remaining) + 1, total);
+	}
+
 	private void saveStringPreference(final String prefName, final String prefValue) {
 		final Editor editor = getSharedPreferences(
 				getPackageName(), Application.MODE_PRIVATE).edit();

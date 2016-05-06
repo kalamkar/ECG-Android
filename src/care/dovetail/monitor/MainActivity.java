@@ -27,6 +27,8 @@ import care.dovetail.monitor.SignalProcessor.Feature;
 public class MainActivity extends Activity implements BluetoothDeviceListener, OnClickListener {
 	private static final String TAG = "MainActivity";
 
+	private App app;
+
 	private BluetoothSmartClient patchClient;
 	private final SignalProcessor signals = new SignalProcessor();
 
@@ -42,6 +44,7 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 	protected void onCreate(Bundle savedInstanceState) {
 		Log.i(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
+		app = (App) getApplication();
 
 		if (getIntent().hasExtra(DemoActivity.DEMO_FLAG)) {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -79,6 +82,8 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 						}
 					}
 		});
+
+		((TextView) findViewById(R.id.recordingIndex)).setText(app.getRecordingIndex());
 	}
 
 	@Override
@@ -255,7 +260,7 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 	}
 
 	public void startRecording() {
-		startRecording(((App) getApplication()).nextRecordingTags());
+		startRecording(app.nextRecordingTags());
 	}
 
 	public void startRecording(String positionTag) {
@@ -273,6 +278,7 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 		((ImageView) findViewById(R.id.record)).setImageResource(R.drawable.ic_action_record);
 		((TextView) findViewById(R.id.label_record)).setText(R.string.record);
 		((TextView) findViewById(R.id.seconds)).setText("");
+		((TextView) findViewById(R.id.recordingIndex)).setText(app.getRecordingIndex());
 	}
 
 	public void onRecordingUpdate(final long durationSeconds) {
