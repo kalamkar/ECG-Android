@@ -3,7 +3,6 @@ package care.dovetail.monitor;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
@@ -11,6 +10,11 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,7 +27,8 @@ import android.widget.ToggleButton;
 import care.dovetail.monitor.BluetoothSmartClient.BluetoothDeviceListener;
 import care.dovetail.monitor.SignalProcessor.Feature;
 
-public class MainActivity extends Activity implements BluetoothDeviceListener, OnClickListener {
+public class MainActivity extends FragmentActivity
+		implements BluetoothDeviceListener, OnClickListener {
 	private static final String TAG = "MainActivity";
 
 	private BluetoothSmartClient patchClient;
@@ -33,10 +38,11 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 	private AudioPlayer player;
 
 	private RecordingFragment recorder;
-	private ChartFragment chartFragment;
 
 	private Timer chartUpdateTimer = null;
 	private Timer bpmUpdateTimer = null;
+
+	private Fragment fragments[] = { new ChartFragment(), new BreathFragment() };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +84,8 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 					}
 		});
 
-		chartFragment = (ChartFragment) getFragmentManager().findFragmentById(R.id.chart);
+		((ViewPager) findViewById(R.id.pager)).setAdapter(
+				new ChartPagerAdapter(getSupportFragmentManager()));;
 	}
 
 	@Override
@@ -207,16 +214,17 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 	private final Runnable chartUpdater = new Runnable() {
 		@Override
 		public void run() {
-			if (MainActivity.this.isDestroyed() || chartFragment == null
+			if (MainActivity.this.isDestroyed()
 					|| ((ToggleButton) findViewById(R.id.pause)).isChecked()) {
 				return;
 			}
 
-			chartFragment.clear();
-			chartFragment.updateGraph(signals.getValues());
-			// chartFragment.updateLongGraph(signals.getBreathValues());
-			chartFragment.updateMarkers(
+			((ChartFragment) fragments[0]).clear();
+			((ChartFragment) fragments[0]).updateGraph(signals.getValues());
+			((ChartFragment) fragments[0]).updateMarkers(
 					signals.getFeatures(Feature.Type.QRS), signals.medianAmplitude);
+			((BreathFragment) fragments[1]).clear();
+			((BreathFragment) fragments[1]).updateGraph(signals.getBreathValues());
 		}
 	};
 
@@ -243,4 +251,20 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 			}
 		}
 	}
+
+	private class ChartPagerAdapter extends FragmentStatePagerAdapter {
+        public ChartPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return fragments[position];
+        }
+
+        @Override
+        public int getCount() {
+            return fragments.length;
+        }
+    }
 }

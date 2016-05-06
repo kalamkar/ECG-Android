@@ -3,9 +3,9 @@ package care.dovetail.monitor;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Fragment;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +19,6 @@ public class ChartFragment extends Fragment {
 	private Chart ecg;
 	private Chart peaks;
 	private Chart median;
-	private Chart breath;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -44,12 +43,6 @@ public class ChartFragment extends Fragment {
 		median = ecgView.makeLineChart(getResources().getColor(android.R.color.darker_gray), 2);
 		median.setXRange(0, Config.GRAPH_LENGTH);
 		median.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
-
-		ChartView breathView = ((ChartView) getView().findViewById(R.id.breath));
-		breath = breathView.makePointsChart(
-					getResources().getColor(android.R.color.holo_green_light), 1);
-		breath.setXRange(0, Config.GRAPH_LENGTH);
-		breath.setYRange(Config.LONG_GRAPH_MIN, Config.LONG_GRAPH_MAX);
 	}
 
 	public void clear() {
@@ -63,14 +56,6 @@ public class ChartFragment extends Fragment {
 			points.add(Pair.create(i, data[i]));
 		}
 		ecg.setData(points);
-	}
-
-	public void updateLongGraph(int data[]) {
-		List<Pair<Integer, Integer>> points = new ArrayList<Pair<Integer, Integer>>(data.length);
-		for (int i = 0; i < data.length; i++) {
-			points.add(Pair.create(i, data[i]));
-		}
-		breath.setData(points);
 	}
 
 	public void updateMarkers(List<Feature> peaks, int medianAmplitude) {

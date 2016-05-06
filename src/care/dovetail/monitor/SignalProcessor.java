@@ -26,7 +26,7 @@ public class SignalProcessor {
 
 	private int updateCount = 0;
 	private final int values[] = new int[Config.GRAPH_LENGTH];
-	private final int breathValues[] = new int[Config.GRAPH_LENGTH];
+	private final int breathValues[] = new int[Config.BREATH_GRAPH_LENGTH];
 
 	private final List<Integer> bpm = new ArrayList<Integer>();
 
@@ -86,7 +86,8 @@ public class SignalProcessor {
 		for (int i = 0; i < chunk.length; i++) {
 			chunk[i] = (int) breathFilter.step(chunk[i]);
 		}
-		System.arraycopy(breathValues, chunk.length, breathValues, 0, breathValues.length - chunk.length);
+		System.arraycopy(breathValues, chunk.length, breathValues, 0,
+				breathValues.length - chunk.length);
 		System.arraycopy(chunk, 0, breathValues, breathValues.length - chunk.length, chunk.length);
 
 		if (updateCount == Config.FEATURE_DETECT_INTERVAL) {

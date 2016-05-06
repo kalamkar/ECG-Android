@@ -1,103 +1,97 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="care.dovetail.monitor.SettingsActivity" >
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context="care.dovetail.monitor.MainActivity" >
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/beat"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical" >
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin" >
 
-        <RelativeLayout
-            android:id="@+id/beat"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="2"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin" >
+        <FrameLayout
+            android:id="@+id/recorder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true" />
 
-            <FrameLayout
-                android:id="@+id/recorder"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true" />
+        <ToggleButton
+            android:id="@+id/pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:text="ToggleButton"
+            android:textOff="@string/action_pause"
+            android:textOn="@string/action_resume"
+            android:visibility="gone" />
 
-            <ToggleButton
-                android:id="@+id/pause"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:text="ToggleButton"
-                android:textOff="@string/action_pause"
-                android:textOn="@string/action_resume"
-                android:visibility="gone" />
-
-            <LinearLayout
-                android:id="@+id/heart"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:background="@drawable/ic_heart" >
-
-                <TextView
-                    android:id="@+id/bpm"
-                    android:layout_width="@dimen/heartbeat_width"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="\?"
-                    android:textColor="@color/primary_dark"
-                    android:textSize="50sp" />
-
-                <TextView
-                    android:id="@+id/textView1"
-                    style="@style/IconTip"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/bpm" />
-                
-                <TextView
-                    android:id="@+id/tap_to_listen"
-                    style="@style/IconTip"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tap_to_listen"
-                    android:textSize="10sp" />
-            </LinearLayout>
+        <LinearLayout
+            android:id="@+id/heart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:background="@drawable/ic_heart" >
 
             <TextView
-                android:id="@+id/status"
+                android:id="@+id/bpm"
+                android:layout_width="@dimen/heartbeat_width"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="\?"
+                android:textColor="@color/primary_dark"
+                android:textSize="50sp" />
+
+            <TextView
+                android:id="@+id/textView1"
                 style="@style/IconTip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:text="@string/connecting" />
-
-            <ProgressBar
-                android:id="@+id/progress"
-                style="?android:attr/progressBarStyleLarge"
+                android:text="@string/bpm" />
+            
+            <TextView
+                android:id="@+id/tap_to_listen"
+                style="@style/IconTip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_below="@+id/status" />
+                android:text="@string/tap_to_listen"
+                android:textSize="10sp" />
+        </LinearLayout>
 
-        </RelativeLayout>
+        <TextView
+            android:id="@+id/status"
+            style="@style/IconTip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/connecting" />
 
-        <fragment
-            android:id="@+id/chart"
-            android:name="care.dovetail.monitor.ChartFragment"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-    </LinearLayout>
+        <ProgressBar
+            android:id="@+id/progress"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/status" />
 
-</FrameLayout>
+    </RelativeLayout>
+    
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>
+
