@@ -59,16 +59,6 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true" />
 
-        <TextView
-            android:id="@+id/status"
-            style="@style/IconTip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:text="@string/connecting"
-            android:drawableTop="@drawable/ic_warning" />
-
         <ToggleButton
             android:id="@+id/pause"
             android:layout_width="wrap_content"
@@ -78,14 +68,23 @@
             android:text="ToggleButton"
             android:textOff="@string/action_pause"
             android:textOn="@string/action_resume" />
+
+        <TextView
+            android:id="@+id/status"
+            style="@style/IconTip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/connecting" />
         
+        <ProgressBar
+            android:id="@+id/progress"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/status" />
     </RelativeLayout>
-   
-    <ProgressBar
-        android:id="@+id/progress"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
 
 </FrameLayout>

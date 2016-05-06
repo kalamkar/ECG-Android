@@ -143,8 +143,7 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 
 	@Override
 	public void onScanEnd() {
-		findViewById(R.id.progress).setVisibility(View.INVISIBLE);
-		findViewById(R.id.status).setVisibility(View.VISIBLE);
+		findViewById(R.id.progress).setVisibility(View.GONE);
 	}
 
 	@Override
@@ -156,9 +155,7 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 				if (MainActivity.this.isDestroyed()) {
 					return;
 				}
-				TextView status = (TextView) findViewById(R.id.status);
-				status.setText(R.string.connected);
-				status.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_connected, 0, 0);
+				((TextView) findViewById(R.id.status)).setText(R.string.connected);
 
 				recorder = new RecordingFragment();
 				getFragmentManager().beginTransaction().add(R.id.recorder, recorder).commit();
@@ -191,9 +188,7 @@ public class MainActivity extends Activity implements BluetoothDeviceListener, O
 				if (MainActivity.this.isDestroyed()) {
 					return;
 				}
-				TextView status = (TextView) findViewById(R.id.status);
-				status.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_warning, 0, 0);
-				status.setText(R.string.disconnected);
+				((TextView) findViewById(R.id.status)).setText(R.string.disconnected);
 				getFragmentManager().beginTransaction().remove(recorder).commit();
 				recorder = null;
 			}
