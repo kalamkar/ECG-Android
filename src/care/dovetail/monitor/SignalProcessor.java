@@ -71,13 +71,14 @@ public class SignalProcessor {
 	}
 
 	public SignalProcessor() {
-		// Lowpass 30bpm. frequency values relative to sampling rate. 0.0025 = 0.5Hz / 200Hz
+		// Frequency values relative to sampling rate.
+		// Lowpass 30bpm. 0.0025 = 0.5Hz / 200Hz
 		breathFilter = new IirFilter(IirFilterDesignFisher.design(
 				FilterPassType.lowpass, FilterCharacteristicsType.bessel, 4, 0, 0.0025, 0));
 
-		// Lowpass 840bpm. frequency values relative to sampling rate. 0.07 = 14Hz / 200Hz
+		// bandpass 30bpm to 840bpm. 0.07 = 14Hz / 200Hz
 		ecgFilter = new IirFilter(IirFilterDesignFisher.design(
-				FilterPassType.lowpass, FilterCharacteristicsType.bessel, 4, 0, 0.07, 0));
+				FilterPassType.bandpass, FilterCharacteristicsType.bessel, 4, 0, 0.0015, 0.07));
 	}
 
 	public synchronized void update(int[] chunk) {
@@ -86,7 +87,8 @@ public class SignalProcessor {
 		System.arraycopy(values, chunk.length, values, 0, values.length - chunk.length);
 		// Pass through a lowpass filter of 30bpm to get breath data
 		for (int i = 0; i < chunk.length; i++) {
-			values[(values.length - chunk.length) + i] = (int) ecgFilter.step(chunk[i]);
+			values[(values.length - chunk.length) + i] = (int) ecgFilter.step(chunk[i])
+					+ (chunk[i] != 0 ? Config.ECG_AMPLITUDE_ADJUST : 0);
 		}
 		// System.arraycopy(chunk, 0, values, values.length - chunk.length, chunk.length);
 

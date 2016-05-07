@@ -27,7 +27,7 @@ public class BreathFragment extends Fragment {
 		super.onViewCreated(view, savedInstanceState);
 		ChartView breathView = ((ChartView) getView().findViewById(R.id.breath));
 		breath = breathView.makePointsChart(
-					getResources().getColor(android.R.color.holo_green_light), 1);
+					getResources().getColor(android.R.color.holo_green_light), 3);
 		breath.setXRange(0, Config.BREATH_GRAPH_LENGTH);
 		breath.setYRange(Config.LONG_GRAPH_MIN, Config.LONG_GRAPH_MAX);
 	}

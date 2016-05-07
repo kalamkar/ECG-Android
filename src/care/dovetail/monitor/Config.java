@@ -34,6 +34,8 @@ public class Config {
 	public static final int MIN_BPM_SAMPLES = 5;
 	public static final int MAX_BPM_SAMPLES = 10;
 
+	public static final int ECG_AMPLITUDE_ADJUST = 100;
+
 	public static final SimpleDateFormat EVENT_TIME_FORMAT =
 			new SimpleDateFormat("hh:mm:ssaa, MMM dd yyyy", Locale.US);
 

@@ -193,15 +193,19 @@ public class MainActivity extends FragmentActivity
 			@Override
 			public void run() {
 				if (MainActivity.this.isDestroyed()) {
+					recorder = null;
 					return;
 				}
 				((TextView) findViewById(R.id.status)).setText(R.string.disconnected);
 				getFragmentManager().beginTransaction().remove(recorder).commit();
-				recorder = null;
 			}
 		});
-		chartUpdateTimer.cancel();
-		bpmUpdateTimer.cancel();
+		if (chartUpdateTimer != null) {
+			chartUpdateTimer.cancel();
+		}
+		if (bpmUpdateTimer != null) {
+			bpmUpdateTimer.cancel();
+		}
 	}
 
 	@Override
