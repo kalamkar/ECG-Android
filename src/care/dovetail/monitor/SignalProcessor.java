@@ -32,7 +32,8 @@ public class SignalProcessor {
 
 	public int medianAmplitude;
 
-	private IirFilter breathFilter;
+	private final IirFilter breathFilter;
+	private final IirFilter ecgFilter;
 
 	public static class Feature {
 		public enum Type {
@@ -73,15 +74,21 @@ public class SignalProcessor {
 		// Lowpass 30bpm. frequency values relative to sampling rate. 0.0025 = 0.5Hz / 200Hz
 		breathFilter = new IirFilter(IirFilterDesignFisher.design(
 				FilterPassType.lowpass, FilterCharacteristicsType.bessel, 4, 0, 0.0025, 0));
+
+		// Lowpass 840bpm. frequency values relative to sampling rate. 0.07 = 14Hz / 200Hz
+		ecgFilter = new IirFilter(IirFilterDesignFisher.design(
+				FilterPassType.lowpass, FilterCharacteristicsType.bessel, 4, 0, 0.07, 0));
 	}
 
-	public void update(int[] chunk) {
+	public synchronized void update(int[] chunk) {
 		updateCount++;
 
 		System.arraycopy(values, chunk.length, values, 0, values.length - chunk.length);
-		System.arraycopy(chunk, 0, values, values.length - chunk.length, chunk.length);
-
-
+		// Pass through a lowpass filter of 30bpm to get breath data
+		for (int i = 0; i < chunk.length; i++) {
+			values[(values.length - chunk.length) + i] = (int) ecgFilter.step(chunk[i]);
+		}
+		// System.arraycopy(chunk, 0, values, values.length - chunk.length, chunk.length);
 
 		System.arraycopy(breathValues, chunk.length, breathValues, 0,
 				breathValues.length - chunk.length);
@@ -107,11 +114,11 @@ public class SignalProcessor {
 		return subset;
 	}
 
-	public int[] getValues() {
+	public synchronized int[] getValues() {
 		return values;
 	}
 
-	public int[] getBreathValues() {
+	public synchronized int[] getBreathValues() {
 		return breathValues;
 	}
 
