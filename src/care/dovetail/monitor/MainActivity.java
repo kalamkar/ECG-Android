@@ -238,10 +238,10 @@ public class MainActivity extends FragmentActivity
 
 	@Override
 	public void onNewValues(int chunk[]) {
-		signals.update(chunk);
 		if (recorder != null) {
 			recorder.record(chunk);
 		}
+		signals.update(chunk);
 
 		audioBufferLength += chunk.length;
 		if (audioBufferLength == Config.GRAPH_LENGTH) {

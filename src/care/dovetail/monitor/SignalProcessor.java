@@ -82,13 +82,14 @@ public class SignalProcessor {
 		System.arraycopy(chunk, 0, values, values.length - chunk.length, chunk.length);
 
 
-		// Pass through a lowpass filter of 30bpm to get breath data
-		for (int i = 0; i < chunk.length; i++) {
-			chunk[i] = (int) breathFilter.step(chunk[i]);
-		}
+
 		System.arraycopy(breathValues, chunk.length, breathValues, 0,
 				breathValues.length - chunk.length);
-		System.arraycopy(chunk, 0, breathValues, breathValues.length - chunk.length, chunk.length);
+		// Pass through a lowpass filter of 30bpm to get breath data
+		for (int i = 0; i < chunk.length; i++) {
+			breathValues[(breathValues.length - chunk.length) + i]
+					= (int) breathFilter.step(chunk[i]);
+		}
 
 		if (updateCount == Config.FEATURE_DETECT_INTERVAL) {
 			updateCount = 0;
