@@ -11,6 +11,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -24,6 +25,7 @@ public class RecordingFragment extends Fragment {
 	private Timer recordingTimer = null;
 	private long recordingStartTime = 0;
 
+	private TextView record;
 	private EditText tags;
 
 	@Override
@@ -64,9 +66,10 @@ public class RecordingFragment extends Fragment {
 		});
 		((TextView) view.findViewById(R.id.recordingIndex)).setText(app.getRecordingIndex());
 
-		view.findViewById(R.id.record).setOnClickListener(new OnClickListener() {
+		record = (TextView) view.findViewById(R.id.record);
+		record.setOnClickListener(new OnClickListener() {
 			@Override
-			public void onClick(View view) {
+			public void onClick(View arg0) {
 				if (writer == null) {
 					String userTags = tags.getText().toString();
 					String positionTags = "demo";
@@ -80,11 +83,23 @@ public class RecordingFragment extends Fragment {
 				}
 			}
 		});
+
+		record.setOnLongClickListener(new OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View arg0) {
+				if (writer != null) {
+					return false;
+				}
+				app.resetRecordingTags();
+				((TextView) getView().findViewById(R.id.recordingIndex)).setText(
+						app.getRecordingIndex());
+				return true;
+			}
+		});
 	}
 
 	public void startRecording(String positionTag) {
 		writer = new EcgDataWriter(app, positionTag);
-		TextView record = (TextView) getView().findViewById(R.id.record);
 		record.setText(R.string.recording);
 		record.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_action_stop, 0, 0);
 
@@ -118,7 +133,6 @@ public class RecordingFragment extends Fragment {
 		writer.close();
 		writer = null;
 		recordingTimer.cancel();
-		TextView record = (TextView) getView().findViewById(R.id.record);
 		record.setText(R.string.record);
 		record.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_action_record, 0, 0);
 		((TextView) getView().findViewById(R.id.seconds)).setText("");

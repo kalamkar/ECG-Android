@@ -88,6 +88,11 @@ public class App extends Application {
 		return recordingPositions.split(",")[0];
 	}
 
+	public void resetRecordingTags() {
+		recordingPositions = Config.POSITION_TAGS;
+		saveStringPreference(RECORDING_POSITIONS, recordingPositions);
+	}
+
 	public String getRecordingIndex() {
 		int total = Config.POSITION_TAGS.split(",").length;
 		int remaining = recordingPositions.split(",").length;
