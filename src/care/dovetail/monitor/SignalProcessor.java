@@ -26,6 +26,7 @@ public class SignalProcessor {
 
 	private int updateCount = 0;
 	private final int values[] = new int[Config.GRAPH_LENGTH];
+	private final int displayValues[] = new int[Config.GRAPH_LENGTH];
 	private final int breathValues[] = new int[Config.BREATH_GRAPH_LENGTH];
 
 	private final List<Integer> bpm = new ArrayList<Integer>();
@@ -112,15 +113,15 @@ public class SignalProcessor {
 	}
 
 	public synchronized int[] getValues() {
-		return values;
+		return displayValues;
 	}
 
 	public synchronized int[] getFilteredValues() {
 		// Pass through a bandpass filter of 30bpm to 840bpm
-		int filtered[] = new int[values.length];
-		for (int i = 0; i < values.length; i++) {
-			filtered[i] = (int) ecgFilter.step(values[i])
-					+ (values[i] != 0 ? Config.ECG_AMPLITUDE_ADJUST : 0);
+		int filtered[] = new int[displayValues.length];
+		for (int i = 0; i < displayValues.length; i++) {
+			filtered[i] = (int) ecgFilter.step(displayValues[i])
+					+ (displayValues[i] != 0 ? Config.ECG_AMPLITUDE_ADJUST : 0);
 		}
 		return filtered;
 	}
@@ -144,6 +145,7 @@ public class SignalProcessor {
 		updateStats();
 		removeQrsOutliers();
 		calculateBpm();
+		System.arraycopy(values, 0, displayValues, 0, displayValues.length);
 	}
 
 	private void findFeatures() {

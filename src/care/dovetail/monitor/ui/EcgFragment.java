@@ -12,9 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import care.dovetail.monitor.Config;
 import care.dovetail.monitor.R;
-import care.dovetail.monitor.SignalProcessor;
-import care.dovetail.monitor.R.id;
-import care.dovetail.monitor.R.layout;
 import care.dovetail.monitor.SignalProcessor.Feature;
 import care.dovetail.monitor.ui.ChartView.Chart;
 
@@ -55,15 +52,13 @@ public class EcgFragment extends Fragment {
 		((ChartView) getView().findViewById(R.id.breath)).clear();
 	}
 
-	public void updateGraph(int data[]) {
+	public void update(int data[], List<Feature> peaks, int medianAmplitude) {
 		List<Pair<Integer, Integer>> points = new ArrayList<Pair<Integer, Integer>>(data.length);
 		for (int i = 0; i < data.length; i++) {
 			points.add(Pair.create(i, data[i]));
 		}
 		ecg.setData(points);
-	}
 
-	public void updateMarkers(List<Feature> peaks, int medianAmplitude) {
 		List<Pair<Integer, Integer>> medianPoints = new ArrayList<Pair<Integer, Integer>>(2);
 		medianPoints.add(Pair.create(0, medianAmplitude));
 		medianPoints.add(Pair.create(Config.GRAPH_LENGTH - 1, medianAmplitude));
@@ -76,5 +71,7 @@ public class EcgFragment extends Fragment {
 			peakPoints.add(Pair.create(peak.index, peak.max));
 		}
 		this.peaks.setData(peakPoints);
+
+		getView().findViewById(R.id.ecg).invalidate();
 	}
 }

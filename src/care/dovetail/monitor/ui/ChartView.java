@@ -63,7 +63,6 @@ public class ChartView extends View {
 			}
 
 			if (data == null || data.size() == 0) {
-				invalidate();
 				return;
 			}
 
@@ -72,8 +71,6 @@ public class ChartView extends View {
 			} else {
 				drawPath(data);
 			}
-
-			invalidate();
 		}
 
 		private void drawPath(List<Pair<Integer, Integer>> data) {

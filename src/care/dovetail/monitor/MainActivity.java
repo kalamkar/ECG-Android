@@ -228,12 +228,11 @@ public class MainActivity extends FragmentActivity
 
 			boolean filter = ((ToggleButton) findViewById(R.id.filter)).isChecked();
 			((EcgFragment) fragments[0]).clear();
-			((EcgFragment) fragments[0]).updateGraph(
-					filter ? signals.getFilteredValues() : signals.getValues());
-			((EcgFragment) fragments[0]).updateMarkers(
+			((EcgFragment) fragments[0]).update(
+					filter ? signals.getFilteredValues() : signals.getValues(),
 					signals.getFeatures(Feature.Type.QRS), signals.medianAmplitude);
 			((BreathFragment) fragments[1]).clear();
-			((BreathFragment) fragments[1]).updateGraph(signals.getBreathValues());
+			((BreathFragment) fragments[1]).update(signals.getBreathValues());
 		}
 	};
 

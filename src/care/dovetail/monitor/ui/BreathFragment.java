@@ -11,8 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import care.dovetail.monitor.Config;
 import care.dovetail.monitor.R;
-import care.dovetail.monitor.R.id;
-import care.dovetail.monitor.R.layout;
 import care.dovetail.monitor.ui.ChartView.Chart;
 
 public class BreathFragment extends Fragment {
@@ -40,11 +38,13 @@ public class BreathFragment extends Fragment {
 		((ChartView) getView().findViewById(R.id.breath)).clear();
 	}
 
-	public void updateGraph(int data[]) {
+	public void update(int data[]) {
 		List<Pair<Integer, Integer>> points = new ArrayList<Pair<Integer, Integer>>(data.length);
 		for (int i = 0; i < data.length; i++) {
 			points.add(Pair.create(i, data[i]));
 		}
 		breath.setData(points);
+
+		getView().findViewById(R.id.breath).invalidate();
 	}
 }
