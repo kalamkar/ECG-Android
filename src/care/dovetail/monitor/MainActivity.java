@@ -128,8 +128,13 @@ public class MainActivity extends FragmentActivity
 
 	@Override
 	public void onScanStart() {
-		findViewById(R.id.progress).setVisibility(View.VISIBLE);
-		((TextView) findViewById(R.id.status)).setText(R.string.connecting);
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				findViewById(R.id.progress).setVisibility(View.VISIBLE);
+				((TextView) findViewById(R.id.status)).setText(R.string.connecting);
+			}
+		});
 	}
 
 	@Override
@@ -140,7 +145,12 @@ public class MainActivity extends FragmentActivity
 
 	@Override
 	public void onScanEnd() {
-		findViewById(R.id.progress).setVisibility(View.GONE);
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				findViewById(R.id.progress).setVisibility(View.GONE);
+			}
+		});
 	}
 
 	@Override
@@ -195,6 +205,9 @@ public class MainActivity extends FragmentActivity
 		}
 		if (bpmUpdateTimer != null) {
 			bpmUpdateTimer.cancel();
+		}
+		if (patchClient != null) {
+			patchClient.startScan();
 		}
 	}
 

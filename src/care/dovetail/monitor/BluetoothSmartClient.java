@@ -107,6 +107,7 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
         	listener.onConnect(gatt.getDevice().getAddress());
         } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
         	listener.onDisconnect(gatt.getDevice().getAddress());
+        	close();
         } else {
         	Log.e(TAG, String.format("GATT server %s changed to unknown new state %d and status %d",
         			gatt.getDevice().getAddress(), newState, status));
