@@ -11,6 +11,7 @@ public class Config {
 	public static final long DATA_UUID = 0x404846A1;
 	public static final String BT_DEVICE_NAME_PREFIX = "Dovetail";
 	public static final int SAMPLE_INTERVAL_MS = 5;
+	public static final int SAMPLES_PER_BROADCAST = 20; // Hardcoded in FW
 
 	public static final int AUDIO_PLAYBACK_RATE = 4000; // 4kHz
 	public static final int AUDIO_BYTES_PER_SAMPLE =
@@ -27,8 +28,9 @@ public class Config {
 
 	public static final int GRAPH_UPDATE_MILLIS = 500;
 
-	// Detect features every 10 chunk updates (and not every update)
-	public static final int FEATURE_DETECT_INTERVAL = 10;
+	// Detect features every 5 chunk updates (and not every update), 500ms interval
+	public static final int FEATURE_DETECT_INTERVAL =
+			GRAPH_UPDATE_MILLIS / (SAMPLE_INTERVAL_MS * SAMPLES_PER_BROADCAST);
 
 	public static final int BPM_UPDATE_MILLIS = 3000;
 	public static final int MIN_BPM_SAMPLES = 5;
