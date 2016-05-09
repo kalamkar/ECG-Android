@@ -1,4 +1,4 @@
-package care.dovetail.monitor;
+package care.dovetail.monitor.ui;
 
 import java.util.ArrayList;
 import java.util.List;

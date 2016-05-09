@@ -1,8 +1,16 @@
-package care.dovetail.monitor;
+package care.dovetail.monitor.ui;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
+import care.dovetail.monitor.App;
+import care.dovetail.monitor.DemoActivity;
+import care.dovetail.monitor.FileDataWriter;
+import care.dovetail.monitor.R;
+import care.dovetail.monitor.R.drawable;
+import care.dovetail.monitor.R.id;
+import care.dovetail.monitor.R.layout;
+import care.dovetail.monitor.R.string;
 import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
@@ -20,7 +28,7 @@ public class RecordingFragment extends Fragment {
 	private static final String TAG = "RecordingFragment";
 
 	private App app;
-	private EcgDataWriter writer = null;
+	private FileDataWriter writer = null;
 
 	private Timer recordingTimer = null;
 	private long recordingStartTime = 0;
@@ -99,7 +107,7 @@ public class RecordingFragment extends Fragment {
 	}
 
 	public void startRecording(String positionTag) {
-		writer = new EcgDataWriter(app, positionTag);
+		writer = new FileDataWriter(app, positionTag);
 		record.setText(R.string.recording);
 		record.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_action_stop, 0, 0);
 

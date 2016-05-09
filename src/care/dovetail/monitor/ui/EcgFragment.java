@@ -1,4 +1,4 @@
-package care.dovetail.monitor;
+package care.dovetail.monitor.ui;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +10,15 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import care.dovetail.monitor.ChartView.Chart;
+import care.dovetail.monitor.Config;
+import care.dovetail.monitor.R;
+import care.dovetail.monitor.SignalProcessor;
+import care.dovetail.monitor.R.id;
+import care.dovetail.monitor.R.layout;
 import care.dovetail.monitor.SignalProcessor.Feature;
+import care.dovetail.monitor.ui.ChartView.Chart;
 
-public class ChartFragment extends Fragment {
+public class EcgFragment extends Fragment {
 	private static final String TAG = "ChartFragment";
 
 	private Chart ecg;

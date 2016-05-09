@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     tools:context="care.dovetail.monitor.MainActivity" >
 
-    <care.dovetail.monitor.ChartView
+    <care.dovetail.monitor.ui.ChartView
         android:id="@+id/breath"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

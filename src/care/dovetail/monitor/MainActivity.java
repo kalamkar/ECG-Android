@@ -26,6 +26,9 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 import care.dovetail.monitor.BluetoothSmartClient.BluetoothDeviceListener;
 import care.dovetail.monitor.SignalProcessor.Feature;
+import care.dovetail.monitor.ui.BreathFragment;
+import care.dovetail.monitor.ui.EcgFragment;
+import care.dovetail.monitor.ui.RecordingFragment;
 
 public class MainActivity extends FragmentActivity
 		implements BluetoothDeviceListener, OnClickListener {
@@ -42,7 +45,7 @@ public class MainActivity extends FragmentActivity
 	private Timer chartUpdateTimer = null;
 	private Timer bpmUpdateTimer = null;
 
-	private Fragment fragments[] = { new ChartFragment(), new BreathFragment() };
+	private Fragment fragments[] = { new EcgFragment(), new BreathFragment() };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -223,9 +226,9 @@ public class MainActivity extends FragmentActivity
 				return;
 			}
 
-			((ChartFragment) fragments[0]).clear();
-			((ChartFragment) fragments[0]).updateGraph(signals.getValues());
-			((ChartFragment) fragments[0]).updateMarkers(
+			((EcgFragment) fragments[0]).clear();
+			((EcgFragment) fragments[0]).updateGraph(signals.getValues());
+			((EcgFragment) fragments[0]).updateMarkers(
 					signals.getFeatures(Feature.Type.QRS), signals.medianAmplitude);
 			((BreathFragment) fragments[1]).clear();
 			((BreathFragment) fragments[1]).updateGraph(signals.getBreathValues());

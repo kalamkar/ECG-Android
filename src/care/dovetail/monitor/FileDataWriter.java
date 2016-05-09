@@ -14,7 +14,7 @@ import android.media.MediaScannerConnection;
 import android.os.Environment;
 import android.util.Log;
 
-public class EcgDataWriter {
+public class FileDataWriter {
 	private static final String TAG = "EcgDataWriter";
 
 	private static final SimpleDateFormat FILE_NAME_FORMAT =
@@ -24,7 +24,7 @@ public class EcgDataWriter {
     private File file;
     private BufferedOutputStream output;
 
-	public EcgDataWriter(App app, String fileTags) {
+	public FileDataWriter(App app, String fileTags) {
 		this.app = app;
 		File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 		file = new File(dir,

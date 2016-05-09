@@ -1,8 +1,13 @@
-package care.dovetail.monitor;
+package care.dovetail.monitor.ui;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import care.dovetail.monitor.App;
+import care.dovetail.monitor.R;
+import care.dovetail.monitor.R.drawable;
+import care.dovetail.monitor.R.id;
+import care.dovetail.monitor.R.layout;
 import android.app.DialogFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
