@@ -103,8 +103,7 @@ public class MainActivity extends FragmentActivity
     protected void onStop() {
     	if (patchClient != null) {
     		patchClient.stopScan();
-    		// patchClient.disableNotifications();
-    		patchClient.disconnect();
+    		patchClient.close();
     		patchClient = null;
     	}
 		if (player != null) {
@@ -208,13 +207,6 @@ public class MainActivity extends FragmentActivity
 		}
 		if (bpmUpdateTimer != null) {
 			bpmUpdateTimer.cancel();
-		}
-	}
-
-	@Override
-	public void onServiceDiscovered(boolean success) {
-		if (success && patchClient != null) {
-			patchClient.enableNotifications();
 		}
 	}
 

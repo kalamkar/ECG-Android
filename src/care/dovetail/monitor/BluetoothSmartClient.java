@@ -36,7 +36,6 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
     	public void onScanEnd();
     	public void onConnect(String address);
     	public void onDisconnect(String address);
-    	public void onServiceDiscovered(boolean success);
     	public void onNewValues(int values[]);
     }
 
@@ -128,12 +127,11 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
     	}
 
     	if (sensorData != null) {
-        		Log.d(TAG, String.format("Found data UUID %s",
-        				Long.toHexString(sensorData.getUuid().getMostSignificantBits())));
-        		listener.onServiceDiscovered(true);
+        	Log.d(TAG, String.format("Found data UUID %s",
+        			Long.toHexString(sensorData.getUuid().getMostSignificantBits())));
+        	enableNotifications();
     	} else {
     		Log.e(TAG, "Could not find Sensor Data characteristic.");
-    		listener.onServiceDiscovered(false);
     	}
     }
 
@@ -170,14 +168,18 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 		return gatt == null ? null : gatt.getDevice().getAddress();
 	}
 
-	public void disconnect() {
-		if (gatt != null && isConnected()) {
-			gatt.disconnect();
-		}
+	public void close() {
+		if (gatt == null) {
+	        return;
+	    }
+//		if (isConnected()) {
+//			gatt.disconnect();
+//		}
+		gatt.close();
 		gatt = null;
 	}
 
-	public boolean enableNotifications() {
+	private boolean enableNotifications() {
 		if (sensorData == null) {
 			return false;
 		}
@@ -190,7 +192,8 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 		return success;
 	}
 
-	public boolean disableNotifications() {
+	@SuppressWarnings("unused")
+	private boolean disableNotifications() {
 		if (sensorData == null) {
 			return false;
 		}
