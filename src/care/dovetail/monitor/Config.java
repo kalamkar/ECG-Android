@@ -43,4 +43,6 @@ public class Config {
 
 	public static final String POSITION_TAGS =
 			"top,right,bottom,left,top_far,right_far,bottom_far,left_far";
+
+	public static final int BLUETOOTH_ENABLE_REQUEST = 0;
 }

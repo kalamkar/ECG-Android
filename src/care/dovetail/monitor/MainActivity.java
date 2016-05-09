@@ -3,10 +3,6 @@ package care.dovetail.monitor;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
-import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -62,15 +58,7 @@ public class MainActivity extends FragmentActivity
 
 		this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-		BluetoothManager bluetoothManager =
-				(BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-		BluetoothAdapter bluetooth = bluetoothManager.getAdapter();
-
-		if (bluetooth == null || !bluetooth.isEnabled()) {
-			Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-			startActivityForResult(enableBtIntent, 0);
-		}
-
+		BluetoothSmartClient.maybeEnableBluetooth(this);
 		if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
 		    Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_LONG).show();
 		}

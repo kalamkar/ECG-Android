@@ -1,5 +1,6 @@
 package care.dovetail.monitor;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
@@ -13,6 +14,7 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -204,5 +206,16 @@ public class BluetoothSmartClient extends BluetoothGattCallback {
 			success = success && gatt.writeDescriptor(descriptor);
 		}
 		return success;
+	}
+
+	public static void maybeEnableBluetooth(Activity activity) {
+		BluetoothManager bluetoothManager =
+				(BluetoothManager) activity.getSystemService(Context.BLUETOOTH_SERVICE);
+		BluetoothAdapter bluetooth = bluetoothManager.getAdapter();
+
+		if (bluetooth == null || !bluetooth.isEnabled()) {
+			Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+			activity.startActivityForResult(enableBtIntent, Config.BLUETOOTH_ENABLE_REQUEST);
+		}
 	}
 }
