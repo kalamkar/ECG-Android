@@ -33,7 +33,7 @@ public class SignalProcessor {
 	public int medianAmplitude;
 
 	private final IirFilter breathFilter;
-//	private final IirFilter ecgFilter;
+	private final IirFilter ecgFilter;
 
 	public static class Feature {
 		public enum Type {
@@ -77,8 +77,8 @@ public class SignalProcessor {
 				FilterPassType.lowpass, FilterCharacteristicsType.bessel, 4, 0, 0.0025, 0));
 
 		// bandpass 30bpm to 840bpm. 0.07 = 14Hz / 200Hz
-//		ecgFilter = new IirFilter(IirFilterDesignFisher.design(
-//				FilterPassType.bandpass, FilterCharacteristicsType.bessel, 4, 0, 0.0015, 0.07));
+		ecgFilter = new IirFilter(IirFilterDesignFisher.design(
+				FilterPassType.bandpass, FilterCharacteristicsType.bessel, 4, 0, 0.0015, 0.07));
 	}
 
 	public synchronized void update(int[] chunk) {
@@ -112,13 +112,17 @@ public class SignalProcessor {
 	}
 
 	public synchronized int[] getValues() {
-		// Pass through a lowpass filter of 30bpm to get breath data
-//		int filtered[] = new int[values.length];
-//		for (int i = 0; i < values.length; i++) {
-//			filtered[i] = (int) ecgFilter.step(values[i])
-//					+ (values[i] != 0 ? Config.ECG_AMPLITUDE_ADJUST : 0);
-//		}
 		return values;
+	}
+
+	public synchronized int[] getFilteredValues() {
+		// Pass through a bandpass filter of 30bpm to 840bpm
+		int filtered[] = new int[values.length];
+		for (int i = 0; i < values.length; i++) {
+			filtered[i] = (int) ecgFilter.step(values[i])
+					+ (values[i] != 0 ? Config.ECG_AMPLITUDE_ADJUST : 0);
+		}
+		return filtered;
 	}
 
 	public synchronized int[] getBreathValues() {

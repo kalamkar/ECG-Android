@@ -14,7 +14,7 @@
     <string name="seconds">sec</string>
     <string name="bpm">beats/min</string>
     
-    <string name="freeze">freeze</string>
+    <string name="filter">Filter</string>
     <string name="record">record</string>
     <string name="recording">recording</string>
     

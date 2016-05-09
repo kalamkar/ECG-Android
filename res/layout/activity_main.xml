@@ -29,7 +29,18 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:text="ToggleButton"
+            android:text="Pause"
+            android:textOff="@string/action_pause"
+            android:textOn="@string/action_resume"
+            android:visibility="gone" />
+        
+        <ToggleButton
+            android:id="@+id/filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:text="Filter"
             android:textOff="@string/action_pause"
             android:textOn="@string/action_resume"
             android:visibility="gone" />
