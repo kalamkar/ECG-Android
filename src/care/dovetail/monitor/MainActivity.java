@@ -192,12 +192,12 @@ public class MainActivity extends FragmentActivity
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				if (MainActivity.this.isDestroyed()) {
-					recorder = null;
-					return;
+				if (!MainActivity.this.isDestroyed()) {
+					((TextView) findViewById(R.id.status)).setText(R.string.disconnected);
+					if (recorder != null) {
+						getFragmentManager().beginTransaction().remove(recorder).commit();
+					}
 				}
-				((TextView) findViewById(R.id.status)).setText(R.string.disconnected);
-				getFragmentManager().beginTransaction().remove(recorder).commit();
 			}
 		});
 		if (chartUpdateTimer != null) {
