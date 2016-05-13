@@ -4,12 +4,6 @@
     android:layout_height="match_parent"
     tools:context="care.dovetail.monitor.SettingsActivity" >
     
-    <fragment
-        android:id="@+id/chart"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="care.dovetail.monitor.ui.EcgFragment"/>
-    
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"

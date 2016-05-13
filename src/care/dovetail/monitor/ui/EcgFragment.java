@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import care.dovetail.monitor.Config;
+import care.dovetail.monitor.DemoActivity;
 import care.dovetail.monitor.R;
 import care.dovetail.monitor.SignalProcessor.Feature;
 import care.dovetail.monitor.ui.ChartView.Chart;
@@ -31,6 +32,10 @@ public class EcgFragment extends Fragment {
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
+
+		if (!getActivity().getIntent().hasExtra(DemoActivity.DEMO_FLAG)) {
+			view.findViewById(R.id.grid).setVisibility(View.INVISIBLE);
+		}
 
 		ChartView ecgView = ((ChartView) getView().findViewById(R.id.ecg));
 		ecg = ecgView.makeLineChart(Color.BLUE, 1);

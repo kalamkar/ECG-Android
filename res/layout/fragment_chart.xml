@@ -3,6 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="care.dovetail.monitor.MainActivity" >
+    
+    <ImageView 
+        android:id="@+id/grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/ecg_grid"
+        android:scaleType="fitXY"
+        android:alpha="0.5" />
 
     <care.dovetail.monitor.ui.ChartView
         android:id="@+id/ecg"
