@@ -38,7 +38,7 @@ public class EcgFragment extends Fragment {
 		}
 
 		ChartView ecgView = ((ChartView) getView().findViewById(R.id.ecg));
-		ecg = ecgView.makeLineChart(Color.BLUE, 1);
+		ecg = ecgView.makeLineChart(Color.BLUE, 2);
 		ecg.setXRange(0, Config.GRAPH_LENGTH);
 		ecg.setYRange(Config.SHORT_GRAPH_MIN, Config.SHORT_GRAPH_MAX);
 
