@@ -5,104 +5,136 @@
     android:gravity="center"
     android:orientation="vertical"
     tools:context="care.dovetail.monitor.MainActivity" >
+    
+    <TextView
+        android:id="@+id/status"
+        style="@style/IconTip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_gravity="right"
+        android:text="@string/connecting" />
 
     <RelativeLayout
-        android:id="@+id/beat"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2"
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin" >
-
+        android:paddingRight="@dimen/activity_horizontal_margin" >
+        
         <FrameLayout
             android:id="@+id/recorder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true" />
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true" />
 
-        <ToggleButton
-            android:id="@+id/pause"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:text="Pause"
-            android:textOff="@string/action_pause"
-            android:textOn="@string/action_resume"
-            android:visibility="gone" />
-        
-        <ToggleButton
-            android:id="@+id/filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:text="Filter"
-            android:textOff="@string/action_pause"
-            android:textOn="@string/action_resume"
-            android:visibility="gone" />
-
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/heart"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:gravity="center"
-            android:orientation="vertical"
+            android:layout_above="@+id/recorder"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:paddingBottom="@dimen/activity_vertical_margin"
             android:background="@drawable/ic_heart" >
-
-            <TextView
-                android:id="@+id/bpm"
-                android:layout_width="@dimen/heartbeat_width"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="\?"
-                android:textColor="@color/primary_dark"
-                android:textSize="50sp" />
-
-            <TextView
-                android:id="@+id/textView1"
-                style="@style/IconTip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/bpm" />
             
-            <TextView
-                android:id="@+id/tap_to_listen"
-                style="@style/IconTip"
+            <LinearLayout
+                android:id="@+id/mom"
+                android:layout_width="@dimen/small_heart_width"
+                android:layout_height="@dimen/small_heart_height"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                
+                android:gravity="center"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/bpm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="\?"
+                    android:textColor="@color/primary_dark"
+                    android:textSize="50sp" />
+
+                <TextView
+                    style="@style/IconTip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mom" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/baby"
+                android:layout_width="@dimen/small_heart_width"
+                android:layout_height="@dimen/small_heart_height"
+                android:layout_centerHorizontal="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:background="@drawable/ic_heart"
+                android:gravity="center"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/baby_bpm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="\?"
+                    android:textColor="@color/primary_dark"
+                    android:textSize="40sp" />
+
+                <TextView
+                    style="@style/IconTip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/baby" />
+
+                <TextView
+                    android:id="@+id/tap_to_listen"
+                    style="@style/IconTip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tap_to_listen"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/progress"
+                style="?android:attr/progressBarStyleLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/tap_to_listen"
-                android:textSize="10sp" />
-        </LinearLayout>
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true" />
 
-        <TextView
-            android:id="@+id/status"
-            style="@style/IconTip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:text="@string/connecting" />
-
-        <ProgressBar
-            android:id="@+id/progress"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_below="@+id/status" />
+        </RelativeLayout>
 
     </RelativeLayout>
-    
+
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
-</LinearLayout>
+    
+    <ToggleButton
+        android:id="@+id/pause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textOff="@string/action_pause"
+        android:textOn="@string/action_resume"
+        android:visibility="gone" />
 
+    <ToggleButton
+        android:id="@+id/filter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textOff="@string/action_pause"
+        android:textOn="@string/action_resume"
+        android:visibility="gone" />
+
+</LinearLayout>
