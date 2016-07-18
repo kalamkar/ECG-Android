@@ -30,6 +30,7 @@ public class RecordingUploadTask extends AsyncTask<Void, Void, Integer> {
 					Build.MANUFACTURER,
 					Build.MODEL,
 					String.format("%dHz", 1000 / Config.SAMPLE_INTERVAL_MS));
+			tags = tags.trim().replaceAll("\n", "").replaceAll("\r", "");
 			String url = String.format("%s?tags=%s", Config.RECORDING_URL, tags.replaceAll(" ", "+"));
 			Pair<Integer, String> response = Utils.uploadFile(url, "application/binary", data);
 			Log.d(TAG, String.format("%d: %s", response.first, response.second));

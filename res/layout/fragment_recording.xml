@@ -42,6 +42,7 @@
         android:layout_marginLeft="@dimen/small_margin"
         android:layout_toRightOf="@+id/recordingIndex"
         android:ems="10"
-        android:hint="@string/recording_tags" />
+        android:hint="@string/recording_tags"
+        android:singleLine="true" />
 
 </RelativeLayout>
